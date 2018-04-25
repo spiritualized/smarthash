@@ -52,6 +52,8 @@ def MItostring(mediainfo):
 				out += MIFormatLine("Format settings, CABAC", track['codec_settings__cabac'])
 			if 'codec_settings_refframes' in track:
 				out += MIFormatLine("Format settings, RefFrames", track['codec_settings_refframes'])
+			if 'muxing_mode' in track:
+				out += MIFormatLine("Muxing mode", track['muxing_mode'])
 			out += MIFormatLine("Codec ID", track['codec_id'])
 			if 'codec_id_hint' in track:
 				out += MIFormatLine("Codec ID/Hint", track['codec_id_hint'])
@@ -66,7 +68,8 @@ def MItostring(mediainfo):
 			out += MIFormatLine("Display aspect ratio", track['other_display_aspect_ratio'][0])
 			if 'other_frame_rate_mode' in track:
 				out += MIFormatLine("Frame rate mode", track['other_frame_rate_mode'][0])
-			out += MIFormatLine("Frame rate", track['other_frame_rate'][0])
+			if 'other_frame_rate' in track:
+				out += MIFormatLine("Frame rate", track['other_frame_rate'][0])
 			out += MIFormatLine("Color space", track['color_space'])
 			out += MIFormatLine("Chroma subsampling", track['chroma_subsampling'])
 			out += MIFormatLine("Bit depth", track['other_bit_depth'][0])
