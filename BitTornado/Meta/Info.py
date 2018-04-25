@@ -292,8 +292,9 @@ class Info(TypedDict):   # pylint: disable=R0904
         elif key == 'pieces':
             return bytes(self.hasher)
         elif key == 'files':
-            if 'files' not in self:
-                raise KeyError('files')
+            pass
+            #if 'files' not in self:
+            #    raise KeyError('files')
         elif key == 'length':
             if 'length' not in self:
                 raise KeyError('length')

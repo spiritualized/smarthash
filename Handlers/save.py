@@ -22,6 +22,9 @@ def handle(data):
 	if 'nfo' in data:
 		with open(os.path.join(data['path']+"_smarthash", "nfo.nfo"), "w") as file:
 			file.write(data['nfo'])
+	if 'mediainfo' in data:
+		with open(os.path.join(data['path']+"_smarthash", "mediainfo.txt"), "w") as file:
+			file.write(data['mediainfo'])
 
 
 	if 'extracted_images' in data:
