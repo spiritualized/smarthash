@@ -25,7 +25,8 @@ def MItostring(mediainfo):
 				out += MIFormatLine("Format version", track['format_version'])
 			out += MIFormatLine("File size", track['other_file_size'][0])
 			out += MIFormatLine("Duration", track['other_duration'][0])
-			out += MIFormatLine("Overall bit rate mode", track['other_overall_bit_rate_mode'][0])
+			if 'other_overall_bit_rate_mode' in track:
+				out += MIFormatLine("Overall bit rate mode", track['other_overall_bit_rate_mode'][0])
 			out += MIFormatLine("Overall bit rate", track['other_overall_bit_rate'][0])
 			if 'encoded_date' in track:
 				out += MIFormatLine("Encoded date", track['encoded_date'])
@@ -74,12 +75,12 @@ def MItostring(mediainfo):
 			if 'other_frame_rate_mode' in track:
 				out += MIFormatLine("Frame rate mode", track['other_frame_rate_mode'][0])
 			out += MIFormatLine("Frame rate", track['other_frame_rate'][0])
+			if 'other_original_frame_rate' in track:
+				out += MIFormatLine("Frame rate mode", track['other_original_frame_rate'][0])
 			out += MIFormatLine("Color space", track['color_space'])
 			out += MIFormatLine("Chroma subsampling", track['chroma_subsampling'])
 			out += MIFormatLine("Bit depth", track['other_bit_depth'][0])
 			out += MIFormatLine("Scan type", track['scan_type'])
-			if 'other_language' in track:
-				out += MIFormatLine("Language", track['other_language'][0])
 			if 'compression_mode' in track:
 				out += MIFormatLine("Compression mode", track['compression_mode'])
 			if 'bits__pixel_frame' in track:
@@ -88,6 +89,10 @@ def MItostring(mediainfo):
 				out += MIFormatLine("Stream size", track['other_stream_size'][0])
 			if 'other_writing_library' in track:
 				out += MIFormatLine("Writing library", track['other_writing_library'][0])
+			if 'encoding_settings' in track:
+				out += MIFormatLine("Encoding settings", track['encoding_settings'])
+			if 'other_language' in track:
+				out += MIFormatLine("Language", track['other_language'][0])
 			if 'default' in track:
 				out += MIFormatLine("Default", track['default'])
 			if 'forced' in track:
