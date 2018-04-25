@@ -105,7 +105,7 @@ if __name__ == "__main__":
 
 			# for video files, compose a standard(ish) MediaInfo text output
 			if mime_prefix == "video":
-				if formatted_mediainfo == "":
+				if formatted_mediainfo != "":
 					formatted_mediainfo += "\n{0}\n".format("-"*70)
 				formatted_mediainfo += MIFormat.MItostring(smarthash_info['mediainfo'])
 
