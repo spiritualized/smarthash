@@ -172,7 +172,7 @@ if __name__ == "__main__":
 
 	nfos = []
 	for f in nfo_filenames:
-		with open(os.path.join(path, f), "r") as file:
+		with open(os.path.join(path, f), "r", encoding="latin-1") as file:
 			nfos.append(file.read())
 
 	for nfo in nfos:
