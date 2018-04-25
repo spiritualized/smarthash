@@ -60,9 +60,14 @@ def MItostring(mediainfo):
 			out += MIFormatLine("Duration", track['other_duration'][0])
 			if 'other_bit_rate_mode' in track:
 				out += MIFormatLine("Bit rate mode", track['other_bit_rate_mode'][0])
-			out += MIFormatLine("Bit rate", track['other_bit_rate'][0])
+			if 'other_bit_rate' in track:
+				out += MIFormatLine("Bit rate", track['other_bit_rate'][0])
 			if 'other_maximum_bit_rate' in track:
 				out += MIFormatLine("Maximum bit rate", track['other_maximum_bit_rate'][0])
+			if 'overall_bit_rate_mode' in track:
+				out += MIFormatLine("Overall bit rate mode", track['overall_bit_rate_mode'][0])
+			if 'overall_bit_rate' in track:
+				out += MIFormatLine("Overall bit rate", track['overall_bit_rate'][0])
 			out += MIFormatLine("Width", track['other_width'][0])
 			out += MIFormatLine("Height", track['other_height'][0])
 			out += MIFormatLine("Display aspect ratio", track['other_display_aspect_ratio'][0])
@@ -73,10 +78,14 @@ def MItostring(mediainfo):
 			out += MIFormatLine("Chroma subsampling", track['chroma_subsampling'])
 			out += MIFormatLine("Bit depth", track['other_bit_depth'][0])
 			out += MIFormatLine("Scan type", track['scan_type'])
+			if 'other_language' in track:
+				out += MIFormatLine("Language", track['other_language'][0])
 			if 'compression_mode' in track:
 				out += MIFormatLine("Compression mode", track['compression_mode'])
-			out += MIFormatLine("Bits/(Pixel*Frame)", track['bits__pixel_frame'])
-			out += MIFormatLine("Stream size", track['other_stream_size'][0])
+			if 'bits__pixel_frame' in track:
+				out += MIFormatLine("Bits/(Pixel*Frame)", track['bits__pixel_frame'])
+			if 'other_stream_size' in track:
+				out += MIFormatLine("Stream size", track['other_stream_size'][0])
 			if 'other_writing_library' in track:
 				out += MIFormatLine("Writing library", track['other_writing_library'][0])
 			if 'default' in track:
@@ -109,8 +118,10 @@ def MItostring(mediainfo):
 			if 'codec_id_hint' in track:
 				out += MIFormatLine("Codec ID/Hint", track['codec_id_hint'])
 			out += MIFormatLine("Duration", track['other_duration'][0])
-			out += MIFormatLine("Bit rate mode", track['other_bit_rate_mode'][0])
-			out += MIFormatLine("Bit rate", track['other_bit_rate'][0])
+			if 'other_bit_rate_mode' in track:
+				out += MIFormatLine("Bit rate mode", track['other_bit_rate_mode'][0])
+			if 'other_bit_rate' in track:
+				out += MIFormatLine("Bit rate", track['other_bit_rate'][0])
 			if 'other_minimum_bit_rate' in track:
 				out += MIFormatLine("Minimum bit rate", track['other_minimum_bit_rate'][0])
 			out += MIFormatLine("Channel(s)", track['other_channel_s'][0])
@@ -120,7 +131,8 @@ def MItostring(mediainfo):
 			if 'other_frame_rate' in track:
 				out += MIFormatLine("Frame rate", track['other_frame_rate'][0])
 			out += MIFormatLine("Compression mode", track['other_compression_mode'][0])
-			out += MIFormatLine("Stream size", track['other_stream_size'][0])
+			if 'other_stream_size' in track:
+				out += MIFormatLine("Stream size", track['other_stream_size'][0])
 			if 'other_alignment' in track:
 				out += MIFormatLine("Alignment", track['other_alignment'][0])
 			if 'other_interleave__duration' in track:
@@ -145,10 +157,16 @@ def MItostring(mediainfo):
 			out += MIFormatLine("Format", track['format'])
 			out += MIFormatLine("Codec ID", track['codec_id'])
 			out += MIFormatLine("Codec ID/Info", track['codec_info'])
-			out += MIFormatLine("Duration", track['other_duration'][0])
-			out += MIFormatLine("Bit rate", track['other_bit_rate'][0])
-			out += MIFormatLine("Count of elements", track['count_of_elements'])
-			out += MIFormatLine("Stream size", track['other_stream_size'][0])
+			if 'other_duration' in track:
+				out += MIFormatLine("Duration", track['other_duration'][0])
+			if 'other_bit_rate' in track:
+				out += MIFormatLine("Bit rate", track['other_bit_rate'][0])
+			if 'count_of_elements' in track:
+				out += MIFormatLine("Count of elements", track['count_of_elements'])
+			if 'other_stream_size' in track:
+				out += MIFormatLine("Stream size", track['other_stream_size'][0])
+			if 'title' in track:
+				out += MIFormatLine("Title", track['title'][0])
 			out += MIFormatLine("Language", track['other_language'][0])
 			out += MIFormatLine("Default", track['default'])
 			out += MIFormatLine("Forced", track['forced'])
