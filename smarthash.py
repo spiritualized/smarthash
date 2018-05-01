@@ -188,7 +188,7 @@ if __name__ == "__main__":
 	# default nfo
 	if len(nfos) > 0 and 'imdb_id' not in data:
 		data['nfo'] = nfos[0]
-	else:
+	if 'nfo' not in data:
 		data['nfo'] = ''
 
 	# manual imdb_id override
