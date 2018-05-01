@@ -35,7 +35,8 @@ def MItostring(mediainfo):
 			out += MIFormatLine("Overall bit rate", track['other_overall_bit_rate'][0])
 			if 'encoded_date' in track:
 				out += MIFormatLine("Encoded date", track['encoded_date'])
-			out += MIFormatLine("Writing application", track['writing_application'])
+			if 'writing_application' in track:
+				out += MIFormatLine("Writing application", track['writing_application'])
 			if 'writing_library' in track:
 				out += MIFormatLine("Writing library", track['writing_library'])
 		
