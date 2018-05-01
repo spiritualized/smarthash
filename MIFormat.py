@@ -45,7 +45,8 @@ def MItostring(mediainfo):
 			if 'format_info' in track:
 				out += MIFormatLine("Format/Info", track['format_info'])
 			out += MIFormatLine("Format profile", track['format_profile'])
-			out += MIFormatLine("Format settings", track['format_settings'])
+			if 'format_settings' in track:
+				out += MIFormatLine("Format settings", track['format_settings'])
 			if 'format_settings__bvop' in track:
 				out += MIFormatLine("Format settings, BVOP", track['format_settings__bvop'])
 			if 'format_settings__qpel' in track:
@@ -116,7 +117,7 @@ def MItostring(mediainfo):
 
 			out += MIFormatLine("ID", track['track_id'])
 			out += MIFormatLine("Format", track['format'])
-			if 'version' in track:
+			if 'format_version' in track:
 				out += MIFormatLine("Format version", track['format_version'])
 			if 'format_profile' in track:
 				out += MIFormatLine("Format profile", track['format_profile'])
