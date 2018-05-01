@@ -83,6 +83,10 @@ if __name__ == "__main__":
 	total_duration = 0
 
 	for file in metainfo['info']['files']:
+		# ignore extensions blacklist
+		if os.path.splitext(*file['path'])[1].lower() in blacklist_media_extensions:
+			continue
+
 		file_path = os.path.join(path, *file['path'])
 		mime_type = magic.from_file(file_path, mime=True)
 		mime_prefix = mime_type.split("/")[0]
