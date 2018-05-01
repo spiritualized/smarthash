@@ -84,7 +84,7 @@ if __name__ == "__main__":
 
 	for file in metainfo['info']['files']:
 		# ignore extensions blacklist
-		if os.path.splitext(*file['path'])[1].lower() in blacklist_media_extensions:
+		if os.path.splitext(os.path.join(*file['path']))[1].lower() in blacklist_media_extensions:
 			continue
 
 		file_path = os.path.join(path, *file['path'])
