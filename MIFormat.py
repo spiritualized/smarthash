@@ -36,7 +36,8 @@ def MItostring(mediainfo):
 			if 'encoded_date' in track:
 				out += MIFormatLine("Encoded date", track['encoded_date'])
 			out += MIFormatLine("Writing application", track['writing_application'])
-			out += MIFormatLine("Writing library", track['writing_library'])
+			if 'writing_library' in track:
+				out += MIFormatLine("Writing library", track['writing_library'])
 		
 		elif track['track_type'] == "Video":
 
@@ -87,7 +88,8 @@ def MItostring(mediainfo):
 			out += MIFormatLine("Color space", track['color_space'])
 			out += MIFormatLine("Chroma subsampling", track['chroma_subsampling'])
 			out += MIFormatLine("Bit depth", track['other_bit_depth'][0])
-			out += MIFormatLine("Scan type", track['scan_type'])
+			if 'scan_type' in track:
+				out += MIFormatLine("Scan type", track['scan_type'])
 			if 'compression_mode' in track:
 				out += MIFormatLine("Compression mode", track['compression_mode'])
 			if 'bits__pixel_frame' in track:
