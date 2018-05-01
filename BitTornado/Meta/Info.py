@@ -273,15 +273,17 @@ class Info(TypedDict):   # pylint: disable=R0904
                 base(update)
             self.progress = updateprogress
 
-    def __contains__(self, key):
-        """Test whether a key is in the Info dict"""
-        files = self._get('files')
-        if key == 'files':
-            return len(files) != 1
-        elif key == 'length':
-            return len(files) == 1
-        else:
-            return key in self.valid_keys
+    # This function causes single-file torrents to ignore their parent folder,
+    # and otherwise doesn't appear to be used
+    # def __contains__(self, key):
+    #     """Test whether a key is in the Info dict"""
+    #     files = self._get('files')
+    #     if key == 'files':
+    #         return len(files) != 1
+    #     elif key == 'length':
+    #         return len(files) == 1
+    #     else:
+    #         return key in self.valid_keys
 
     def __getitem__(self, key):
         """Retrieve value associated with key in Info dict"""
@@ -384,7 +386,6 @@ class Info(TypedDict):   # pylint: disable=R0904
                 tohash.seek(seek)
                 self.hasher.update(tohash.read())
                 seek = 0
-                print("ASDASD")
 
         if self.hasher.digest != validator:
             self.hasher.resetHash()
