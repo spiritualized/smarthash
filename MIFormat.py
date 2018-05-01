@@ -6,6 +6,11 @@ def MItostring(mediainfo):
 	out = ""
 
 	for track in mediainfo:
+		if 'text_format_list' in track:
+			continue
+		if track.get('format') == "RLE":
+			continue
+
 		#for k,v in track.items():
 		#	print(MIFormatLine(k,v), end="")
 
