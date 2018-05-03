@@ -186,6 +186,9 @@ def MItostring(mediainfo):
 			out += MIFormatLine("Default", track['default'])
 			out += MIFormatLine("Forced", track['forced'])
 
+		elif track['track_type'] == "Menu":
+			pass
+
 		else:
 			raise ValueError("Unknown track type: {0}".format(track['track_type']))
 
