@@ -15,7 +15,7 @@ import MIFormat
 from functions import *
 from config import *
 
-smarthash_version = "1.0.2"
+smarthash_version = "1.0.3"
 
 
 if __name__ == "__main__":
@@ -176,8 +176,7 @@ if __name__ == "__main__":
 
 	nfos = []
 	for f in nfo_filenames:
-		with open(os.path.join(path, f), "r", encoding="latin-1") as file:
-			nfos.append(file.read())
+		nfos.append(read_nfo(os.path.join(path, f)))
 
 	for nfo in nfos:
 		imdb_id = re.findall(r"imdb\.com/title/tt(\d{7})", nfo)

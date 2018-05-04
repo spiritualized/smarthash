@@ -11,6 +11,16 @@ def imgKeyVariance(item):
 def imgKeyOrder(item):
 	return item[0]	
 
+def read_nfo(path):
+	nfo = None
+	try:
+		with open(path, "r") as file:
+			nfo = file.read()
+	except:
+		with open(path, "r", encoding="latin-1") as file:
+			nfo = file.read()
+
+	return nfo
 
 def choose_genre(genres):
 	if len(genres) == 0:
