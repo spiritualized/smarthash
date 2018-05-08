@@ -33,6 +33,7 @@ if __name__ == "__main__":
 	argparser.add_argument('--version', action='version', version="SmartHash {0}".format(smarthash_version))
 	argparser.add_argument("--handler", help="specify a manual output script: "+", ".join(handler_filenames), default="default")
 	argparser.add_argument("--destination", help="specify a file destination")
+	argparser.add_argument("--nfo-path", help="specify a nfo file/folder path manually")
 
 	handlers = {}
 
@@ -170,13 +171,23 @@ if __name__ == "__main__":
 
 
 
-	# read nfos
+	# read nfos from main path
 	nfo_filenames = [f for f in os.listdir(path) if os.path.isfile(os.path.join(path, f))]
 	nfo_filenames = [f for f in nfo_filenames if f.lower().endswith(".nfo")]
 
 	nfos = []
 	for f in nfo_filenames:
 		nfos.append(read_nfo(os.path.join(path, f)))
+
+	# manual nfo path
+	if args.nfo_path:
+		if os.path.isfile(args.nfo_path) and args.nfo_path.lower().endswith(".nfo"):
+			nfos.append(read_nfo(args.nfo_path))
+		elif os.path.isdir(args.nfo_path):
+			nfo_filenames = [f for f in os.listdir(args.nfo_path) if os.path.isfile(os.path.join(args.nfo_path, f))]
+			nfo_filenames = [f for f in nfo_filenames if f.lower().endswith(".nfo")]
+			for f in nfo_filenames:
+				nfos.append(read_nfo(os.path.join(args.nfo_path, f)))
 
 	for nfo in nfos:
 		imdb_id = re.findall(r"imdb\.com/title/tt(\d{7})", nfo)
