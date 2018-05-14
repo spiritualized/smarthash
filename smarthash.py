@@ -15,7 +15,7 @@ import MIFormat
 from functions import *
 from config import *
 
-smarthash_version = "1.0.3"
+smarthash_version = "1.0.4"
 
 
 if __name__ == "__main__":
@@ -84,15 +84,16 @@ if __name__ == "__main__":
 	total_duration = 0
 
 	for file in metainfo['info']['files']:
+		ext = os.path.splitext(os.path.join(*file['path']))[1].lower()
 		# ignore extensions blacklist
-		if os.path.splitext(os.path.join(*file['path']))[1].lower() in blacklist_media_extensions:
+		if ext in blacklist_media_extensions:
 			continue
 
 		file_path = os.path.join(path, *file['path'])
 		mime_type = magic.from_file(file_path, mime=True)
 		mime_prefix = mime_type.split("/")[0]
 
-		if mime_prefix in ["audio", "video"]:
+		if mime_prefix in ["audio", "video"] or ext in whitelist_video_extensions:
 			smarthash_info = OrderedDict({'mime_type': mime_type})
 			smarthash_info['mediainfo'] = []
 
@@ -109,7 +110,7 @@ if __name__ == "__main__":
 				smarthash_info['mediainfo'].append(track_map)
 
 			# for video files, compose a standard(ish) MediaInfo text output
-			if mime_prefix == "video":
+			if mime_prefix == "video" or ext in whitelist_video_extensions:
 				if formatted_mediainfo != "":
 					formatted_mediainfo += "\n{0}\n".format("-"*70)
 				formatted_mediainfo += MIFormat.MItostring(smarthash_info['mediainfo'])
