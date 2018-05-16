@@ -73,7 +73,7 @@ def make_meta_file(loc, url, params=None, flag=None,
         # Check if any of the file/foldernames contain a blacklisted word
         for pathsegment in path:
             for match in params['blacklist_path_matches']:
-                if match in pathsegment:
+                if pathsegment.startswith(match):
                     info['files'].remove(x)
                     continue
 
