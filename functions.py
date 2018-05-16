@@ -4,7 +4,7 @@ from termcolor import colored, cprint
 
 def error(msg):
 	cprint(msg, 'red')
-	exit()
+	exit(1)
 
 def imgKeyVariance(item):
 	return item[1]
