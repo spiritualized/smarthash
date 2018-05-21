@@ -182,7 +182,8 @@ def MItostring(mediainfo):
 				out += MIFormatLine("Stream size", track['other_stream_size'][0])
 			if 'title' in track:
 				out += MIFormatLine("Title", track['title'][0])
-			out += MIFormatLine("Language", track['other_language'][0])
+			if 'other_language' in track:
+				out += MIFormatLine("Language", track['other_language'][0])
 			out += MIFormatLine("Default", track['default'])
 			out += MIFormatLine("Forced", track['forced'])
 
