@@ -83,6 +83,25 @@ if __name__ == "__main__":
 	extracted_images = []
 	total_duration = 0
 
+	# count the number of video files first
+	num_video_files = 0
+	for file in metainfo['info']['files']:
+		ext = os.path.splitext(os.path.join(*file['path']))[1].lower()
+		if ext in blacklist_media_extensions:
+			continue
+		file_path = os.path.join(path, *file['path'])
+		mime_type = magic.from_file(file_path, mime=True)
+		mime_prefix = mime_type.split("/")[0]
+		if mime_prefix == "video" or ext in whitelist_video_extensions:
+			num_video_files += 1
+
+	images_per_video_file = 4
+	if num_video_files in [2,3]:
+		images_per_video_file = 2
+	elif num_video_files > 3:
+		images_per_video_file = 1
+
+
 	for file in metainfo['info']['files']:
 		ext = os.path.splitext(os.path.join(*file['path']))[1].lower()
 		# ignore extensions blacklist
@@ -116,7 +135,7 @@ if __name__ == "__main__":
 				formatted_mediainfo += MIFormat.MItostring(smarthash_info['mediainfo'])
 
 				if "video-screenshots" in handlers[args.handler].options:
-					extracted_images.append(extractImages(file_path, 4))
+					extracted_images.append(extractImages(file_path, images_per_video_file))
 
 
 			# extract audio tags
