@@ -10,6 +10,9 @@ def attach_arguments(argparser):
 def check_parameters(args):
 	pass
 
+def early_validation(path, args):
+	pass
+
 def handle(data):
 
 	meta_folder = data['path']+"_smarthash"
