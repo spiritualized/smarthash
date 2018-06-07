@@ -15,7 +15,7 @@ import MIFormat
 from functions import *
 from config import *
 
-smarthash_version = "1.0.4"
+smarthash_version = "1.0.5"
 
 
 if __name__ == "__main__":
@@ -66,6 +66,9 @@ if __name__ == "__main__":
 	if not os.path.isdir(path):
 		cprint("Path does not exist, or is not a directory", 'red')
 		exit()
+
+
+	handlers[args.handler].early_validation(path, args)
 
 	params = {
 				'blacklist_file_extensions': [x.lower() for x in blacklist_file_extensions],
