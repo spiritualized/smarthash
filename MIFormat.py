@@ -67,7 +67,8 @@ def MItostring(mediainfo):
 			out += MIFormatLine("Codec ID", track['codec_id'])
 			if 'codec_id_hint' in track:
 				out += MIFormatLine("Codec ID/Hint", track['codec_id_hint'])
-			out += MIFormatLine("Duration", track['other_duration'][0])
+			if 'other_duration' in track:
+				out += MIFormatLine("Duration", track['other_duration'][0])
 			if 'other_bit_rate_mode' in track:
 				out += MIFormatLine("Bit rate mode", track['other_bit_rate_mode'][0])
 			if 'other_bit_rate' in track:
@@ -83,7 +84,8 @@ def MItostring(mediainfo):
 			out += MIFormatLine("Display aspect ratio", track['other_display_aspect_ratio'][0])
 			if 'other_frame_rate_mode' in track:
 				out += MIFormatLine("Frame rate mode", track['other_frame_rate_mode'][0])
-			out += MIFormatLine("Frame rate", track['other_frame_rate'][0])
+			if 'other_frame_rate' in track:
+				out += MIFormatLine("Frame rate", track['other_frame_rate'][0])
 			if 'other_original_frame_rate' in track:
 				out += MIFormatLine("Frame rate mode", track['other_original_frame_rate'][0])
 			out += MIFormatLine("Color space", track['color_space'])

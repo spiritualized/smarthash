@@ -2,6 +2,8 @@ import math, io, os
 import cv2
 from termcolor import colored, cprint
 
+from config import blacklist_file_extensions, blacklist_path_matches
+
 def error(msg):
 	cprint(msg, 'red')
 	exit(1)
@@ -102,6 +104,30 @@ def extractImages(path, n):
 
 #	images = sorted()
 
+def listFiles(parent_dir):
+	file_list = []
+	listFilesInner(parent_dir, '', file_list)
+
+	for x in blacklist_path_matches:
+		for file in file_list:
+			if x.lower() in file.lower():
+				file_list.remove(file)
+				continue
+
+	for x in blacklist_file_extensions:
+		for file in file_list:
+			if file.lower().endswith(x.lower()):
+				file_list.remove(file)
+				continue
+
+	return file_list
+
+def listFilesInner(parent, path, file_list):
+	for curr in os.scandir(os.path.join(parent, path)):
+		if curr.is_file():
+			file_list.append(os.path.relpath(os.path.join(path, curr)))
+		elif curr.is_dir():
+			listFilesInner(parent, curr, file_list)
 
 
 def prog(amount):
