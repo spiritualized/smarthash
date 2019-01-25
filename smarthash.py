@@ -67,57 +67,29 @@ if __name__ == "__main__":
 		cprint("Path does not exist, or is not a directory", 'red')
 		exit()
 
-
-	handlers[args.handler].early_validation(path, args)
-
-	params = {
-				'blacklist_file_extensions': [x.lower() for x in blacklist_file_extensions],
-				'blacklist_path_matches': [x.lower() for x in blacklist_path_matches],
-				'comment': "Generated with SmartHash {0}".format(smarthash_version),
-				'smarthash_version': smarthash_version,
-	}
-
-	metainfo = make_meta_file(path, None, params=params, progress=prog)
-	print()
+	file_list = listFiles(path)
 
 	parent_dir = os.path.abspath(os.path.join(path, os.pardir)) + os.path.sep
-
-	formatted_mediainfo = ""
-	extracted_images = []
 	total_duration = 0
-
-	# count the number of video files first
+	smarthash_path_info = {}
 	num_video_files = 0
-	for file in metainfo['info']['files']:
-		ext = os.path.splitext(os.path.join(*file['path']))[1].lower()
-		if ext in blacklist_media_extensions:
-			continue
-		file_path = os.path.join(path, *file['path'])
-		mime_type = magic.from_file(file_path, mime=True)
-		mime_prefix = mime_type.split("/")[0]
-		if mime_prefix == "video" or ext in whitelist_video_extensions:
-			num_video_files += 1
 
-	images_per_video_file = 4
-	if num_video_files in [2,3]:
-		images_per_video_file = 2
-	elif num_video_files > 3:
-		images_per_video_file = 1
-
-
-	for file in metainfo['info']['files']:
-		ext = os.path.splitext(os.path.join(*file['path']))[1].lower()
+	# extract metadata into a path -> json-metadata map
+	for file in file_list:
+		ext = os.path.splitext(file)[1].lower()
 		# ignore extensions blacklist
 		if ext in blacklist_media_extensions:
 			continue
 
-		file_path = os.path.join(path, *file['path'])
+		file_path = os.path.join(parent_dir, file)
 		mime_type = magic.from_file(file_path, mime=True)
 		mime_prefix = mime_type.split("/")[0]
 
-		if mime_prefix in ["audio", "video"] or ext in whitelist_video_extensions:
-			smarthash_info = OrderedDict({'mime_type': mime_type})
+		if mime_prefix in ["audio", "video"] or ext in whitelist_video_extensions or ext in whitelist_audio_extensions:
+			smarthash_info = OrderedDict()
 			smarthash_info['mediainfo'] = []
+			if mime_type:
+				smarthash_info['mime_type'] = mime_type
 
 			media_info = MediaInfo.parse(file_path)
 			for track in media_info.tracks:
@@ -131,18 +103,8 @@ if __name__ == "__main__":
 
 				smarthash_info['mediainfo'].append(track_map)
 
-			# for video files, compose a standard(ish) MediaInfo text output
-			if mime_prefix == "video" or ext in whitelist_video_extensions:
-				if formatted_mediainfo != "":
-					formatted_mediainfo += "\n{0}\n".format("-"*70)
-				formatted_mediainfo += MIFormat.MItostring(smarthash_info['mediainfo'])
-
-				if "video-screenshots" in handlers[args.handler].options:
-					extracted_images.append(extractImages(file_path, images_per_video_file))
-
-
 			# extract audio tags
-			elif mime_prefix == "audio":
+			if mime_prefix == "audio" or ext in whitelist_audio_extensions:
 				smarthash_info['tags'] = OrderedDict()
 
 				mutagen_file = mutagen.File(file_path)	# easy=True
@@ -156,9 +118,58 @@ if __name__ == "__main__":
 				for tag in sorted(tags):
 					smarthash_info['tags'][tag] = tags[tag]
 
-			file['smarthash_info'] = json.dumps(smarthash_info)
+			# count the number of video files
+			if (mime_prefix == "video" or ext in whitelist_video_extensions) and ext not in blacklist_media_extensions:
+				num_video_files += 1
+
+			smarthash_path_info[file] = smarthash_info
+
+	handlers[args.handler].early_validation(path, args)
+
+	params = {
+				'blacklist_file_extensions': [x.lower() for x in blacklist_file_extensions],
+				'blacklist_path_matches': [x.lower() for x in blacklist_path_matches],
+				'comment': "Generated with SmartHash {0}".format(smarthash_version),
+				'smarthash_version': smarthash_version,
+	}
+
+	# hash the folder
+	metainfo = make_meta_file(path, None, params=params, progress=prog)
+	print()
+
+	# lookup gathered metadata and insert into the torrent file metainfo
+	for file in metainfo['info']['files']:
+		file_path = os.path.join(os.path.basename(path), *file['path'])
+
+		if file_path in smarthash_path_info:
+			file['smarthash_info'] = json.dumps(smarthash_path_info[file_path])
+
+	images_per_video_file = 4
+	if num_video_files in [2,3]:
+		images_per_video_file = 2
+	elif num_video_files > 3:
+		images_per_video_file = 1
+
+	formatted_mediainfo = ""
+	extracted_images = []
+
+	# extract MediaInfo
+	for file in metainfo['info']['files']:
+		file_path = os.path.join(path, *file['path'])
+		mime_type = magic.from_file(file_path, mime=True)
+		mime_prefix = mime_type.split("/")[0]
+
+		# for video files, compose a standard(ish) MediaInfo text output
+		if mime_prefix == "video" or ext in whitelist_video_extensions:
+			if formatted_mediainfo != "":
+				formatted_mediainfo += "\n{0}\n".format("-"*70)
+			formatted_mediainfo += MIFormat.MItostring(smarthash_path_info[os.path.join(os.path.basename(path), *file['path'])]['mediainfo'])
+
+			if "video-screenshots" in handlers[args.handler].options:
+				extracted_images.append(extractImages(file_path, images_per_video_file))
 
 
+	# collect the dataset for the handler
 	data = {	'smarthash_version': smarthash_version,
 				'args': args,
 				'path': path,
@@ -169,6 +180,7 @@ if __name__ == "__main__":
 				'torrent_file': metainfo.gettorrent(),
 	}
 
+	# TODO move to handler
 	# output destination for default handler
 	if args.handler == "default":
 		data['save_path'] = path + ".torrent"
