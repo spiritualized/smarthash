@@ -7,7 +7,6 @@ from termcolor import colored, cprint
 
 import argparse
 import colorama
-import magic
 import imdb
 import mutagen
 
@@ -82,7 +81,7 @@ if __name__ == "__main__":
 			continue
 
 		file_path = os.path.join(parent_dir, file)
-		mime_type = magic.from_file(file_path, mime=True)
+		mime_type = get_mime_type(file_path)
 		mime_prefix = mime_type.split("/")[0]
 
 		if mime_prefix in ["audio", "video"] or ext in whitelist_video_extensions or ext in whitelist_audio_extensions:
@@ -124,7 +123,58 @@ if __name__ == "__main__":
 
 			smarthash_path_info[file] = smarthash_info
 
-	handlers[args.handler].early_validation(path, args)
+	# read nfos from main path
+	nfo_filenames = [f for f in os.listdir(path) if os.path.isfile(os.path.join(path, f))]
+	nfo_filenames = [f for f in nfo_filenames if f.lower().endswith(".nfo")]
+
+	nfos = []
+	for f in nfo_filenames:
+		nfos.append(read_nfo(os.path.join(path, f)))
+
+	# manual nfo path
+	if args.nfo_path:
+		if os.path.isfile(args.nfo_path) and args.nfo_path.lower().endswith(".nfo"):
+			nfos.append(read_nfo(args.nfo_path))
+		elif os.path.isdir(args.nfo_path):
+			nfo_filenames = [f for f in os.listdir(args.nfo_path) if os.path.isfile(os.path.join(args.nfo_path, f))]
+			nfo_filenames = [f for f in nfo_filenames if f.lower().endswith(".nfo")]
+			for f in nfo_filenames:
+				nfos.append(read_nfo(os.path.join(args.nfo_path, f)))
+
+	imdb_id = None
+	genre = None
+	nfo = ''
+
+	for curr_nfo in nfos:
+		imdb_id_match = re.findall(r"imdb\.com/title/tt(\d{7})", curr_nfo)
+		if imdb_id_match:
+			imdb_id = imdb_id_match[0]
+			nfo = curr_nfo
+
+	# default nfo
+	if len(nfos) > 0 and not imdb_id:
+		nfo = nfos[0]
+
+	# manual imdb_id override
+	if args.imdb_id:
+		imdb_id = args.imdb_id
+
+	# make sure the IMDb ID exists
+	if imdb_id and 'imdb-id' in handlers[args.handler].options:
+		#imdb._logging.setLevel("error")
+		print('IMDb querying...\r', end='\r'),
+		imdb_site = imdb.IMDb()
+
+		imdb_movie = imdb_site.get_movie(imdb_id)
+		if not imdb_movie:
+			cprint("Invalid IMDb ID: {0}".format(imdb_id), "red")
+			exit()
+		print("IMDb verified: \"{0}\"".format(imdb_movie))
+
+		genre = choose_genre(imdb_movie['genres'])
+
+
+	handlers[args.handler].early_validation(path, {'args':args, 'smarthash_info':smarthash_path_info, 'title':os.path.basename(path), 'imdb_id':imdb_id})
 
 	params = {
 				'blacklist_file_extensions': [x.lower() for x in blacklist_file_extensions],
@@ -156,7 +206,7 @@ if __name__ == "__main__":
 	# extract MediaInfo
 	for file in metainfo['info']['files']:
 		file_path = os.path.join(path, *file['path'])
-		mime_type = magic.from_file(file_path, mime=True)
+		mime_type = get_mime_type(file_path)
 		mime_prefix = mime_type.split("/")[0]
 
 		# for video files, compose a standard(ish) MediaInfo text output
@@ -169,6 +219,7 @@ if __name__ == "__main__":
 				extracted_images.append(extractImages(file_path, images_per_video_file))
 
 
+
 	# collect the dataset for the handler
 	data = {	'smarthash_version': smarthash_version,
 				'args': args,
@@ -178,7 +229,13 @@ if __name__ == "__main__":
 				'mediainfo':formatted_mediainfo,
 				'extracted_images':extracted_images,
 				'torrent_file': metainfo.gettorrent(),
+				'nfo':nfo,
 	}
+
+	if imdb_id:
+		data['imdb_id'] = imdb_id
+	if genre:
+		data['genre'] = genre
 
 	# TODO move to handler
 	# output destination for default handler
@@ -204,55 +261,6 @@ if __name__ == "__main__":
 				cprint("Output path {0} does not exist".format(os.path.dirname(data['save_path'])), "red")
 				exit()
 
-
-
-	# read nfos from main path
-	nfo_filenames = [f for f in os.listdir(path) if os.path.isfile(os.path.join(path, f))]
-	nfo_filenames = [f for f in nfo_filenames if f.lower().endswith(".nfo")]
-
-	nfos = []
-	for f in nfo_filenames:
-		nfos.append(read_nfo(os.path.join(path, f)))
-
-	# manual nfo path
-	if args.nfo_path:
-		if os.path.isfile(args.nfo_path) and args.nfo_path.lower().endswith(".nfo"):
-			nfos.append(read_nfo(args.nfo_path))
-		elif os.path.isdir(args.nfo_path):
-			nfo_filenames = [f for f in os.listdir(args.nfo_path) if os.path.isfile(os.path.join(args.nfo_path, f))]
-			nfo_filenames = [f for f in nfo_filenames if f.lower().endswith(".nfo")]
-			for f in nfo_filenames:
-				nfos.append(read_nfo(os.path.join(args.nfo_path, f)))
-
-	for nfo in nfos:
-		imdb_id = re.findall(r"imdb\.com/title/tt(\d{7})", nfo)
-		if imdb_id:
-			data['imdb_id'] = imdb_id[0]
-			data['nfo'] = nfo
-
-	# default nfo
-	if len(nfos) > 0 and 'imdb_id' not in data:
-		data['nfo'] = nfos[0]
-	if 'nfo' not in data:
-		data['nfo'] = ''
-
-	# manual imdb_id override
-	if args.imdb_id:
-		data['imdb_id'] = args.imdb_id
-
-	# make sure the IMDb ID exists
-	if 'imdb_id' in data and 'imdb-id' in handlers[args.handler].options:
-		#imdb._logging.setLevel("error")
-		print('IMDb querying...\r', end='\r'),
-		imdb_site = imdb.IMDb()
-
-		imdb_movie = imdb_site.get_movie(data['imdb_id'])
-		if not imdb_movie:
-			cprint("Invalid IMDb ID: {0}".format(data['imdb_id']), "red")
-			exit()
-		print("IMDb verified: \"{0}\"".format(imdb_movie))
-
-		data['genre'] = choose_genre(imdb_movie['genres'])
 
 	handlers[args.handler].handle(data)
 

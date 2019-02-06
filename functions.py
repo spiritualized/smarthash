@@ -1,6 +1,7 @@
 import math, io, os
 import cv2
 from termcolor import colored, cprint
+import magic
 
 from config import blacklist_file_extensions, blacklist_path_matches
 
@@ -133,3 +134,12 @@ def listFilesInner(parent, path, file_list):
 def prog(amount):
 	print('Hashing: %.1f%% complete\r' % (amount * 100), end='\r')
 
+
+def get_mime_type(path):
+	mime_type = ''
+	try:
+		with open(path, 'rb') as infile:
+			return magic.from_buffer(infile.read(), mime=True)
+	except:
+		pass
+	return mime_type
