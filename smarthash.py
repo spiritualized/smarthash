@@ -174,7 +174,7 @@ if __name__ == "__main__":
 		genre = choose_genre(imdb_movie['genres'])
 
 
-	handlers[args.handler].early_validation(path, {'args':args, 'smarthash_info':smarthash_path_info, 'title':os.path.basename(path), 'imdb_id':imdb_id})
+	handlers[args.handler].early_validation(path, {'args':args, 'smarthash_info':smarthash_path_info, 'title':os.path.basename(path), 'imdb_id':imdb_id, 'genre':genre,})
 
 	params = {
 				'blacklist_file_extensions': [x.lower() for x in blacklist_file_extensions],
