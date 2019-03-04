@@ -37,7 +37,7 @@ if __name__ == "__main__":
 	handlers = {}
 
 	for x in handler_filenames:
-		handlers[x] = importlib.import_module("Handlers."+x)
+		handlers[x] = importlib.import_module("Handlers."+x).TorrentHandler()
 
 		if not hasattr(handlers[x], 'handle'):
 				print("Could not import \"{0}\" handler".format(x))

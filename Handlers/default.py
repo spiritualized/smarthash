@@ -1,19 +1,21 @@
 import os
 
 
-description = "Save a torrent file only"
-options = []
+class TorrentHandler:
 
-def attach_arguments(argparser):
-	pass
+	description = "Save a torrent file only"
+	options = []
 
-def check_parameters(args):
-	pass
+	def attach_arguments(self, argparser):
+		pass
 
-def early_validation(path, args):
-	pass
+	def check_parameters(self, args):
+		pass
 
-def handle(data):
+	def early_validation(self, path, data):
+		pass
 
-	with open(data['save_path'], 'wb') as handle:
-		handle.write(data['torrent_file'])
+	def handle(self, data):
+
+		with open(data['save_path'], 'wb') as handle:
+			handle.write(data['torrent_file'])
