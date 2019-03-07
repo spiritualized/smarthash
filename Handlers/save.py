@@ -1,19 +1,11 @@
+from basehandler import BaseHandler
 import os
 
 
-class TorrentHandler:
+class TorrentHandler(BaseHandler):
 
 	description = "Writes extracted data out to a folder"
 	options = ['video-screenshots']
-
-	def attach_arguments(self, argparser):
-		pass
-
-	def check_parameters(self, args):
-		pass
-
-	def early_validation(self, path, data):
-		pass
 
 	def handle(self, data):
 
