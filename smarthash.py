@@ -1,4 +1,4 @@
-import os, sys, importlib, inspect, json, math, re
+import os, sys, importlib, imp, inspect, json, math, re
 from collections import OrderedDict
 
 from BitTornado.Application.makemetafile import make_meta_file
@@ -26,6 +26,9 @@ if __name__ == "__main__":
 	handler_filenames = [f for f in os.listdir(handler_path) if os.path.isfile(os.path.join(handler_path, f))]
 	handler_filenames = [ f.split(".")[0] for f in handler_filenames if f.endswith(".py") ]
 
+	if os.path.exists(os.path.join(handler_path, '__temp__.py')):
+		os.remove(os.path.join(handler_path, '__temp__.py'))
+
 	# basic parameters
 	argparser = argparse.ArgumentParser()
 	argparser.add_argument("path")
@@ -40,11 +43,29 @@ if __name__ == "__main__":
 		handlers[x] = importlib.import_module("Handlers."+x).TorrentHandler()
 
 		if not hasattr(handlers[x], 'handle'):
-				print("Could not import \"{0}\" handler".format(x))
+			print("Could not import \"{0}\" handler".format(x))
+			exit()
+
+
+		new_handler_src = handlers[x].get_update(smarthash_version)
+
+		if new_handler_src != "":
+			try:
+				with open(os.path.join(handler_path, '__temp__.py'), 'w+') as handler_file:
+					handler_file.write(new_handler_src)
+				new_handler_module = importlib.import_module("Handlers.__temp__").TorrentHandler()
+
+				os.remove(os.path.join(handler_path, handlers[x].get_filename()))
+				os.rename(os.path.join(handler_path, new_handler_module.get_filename()), os.path.join(handler_path, handlers[x].get_filename()))
+				print("'{0}' handler updated from {1} to {2}".format(new_handler_module.description, handlers[x].handler_version, new_handler_module.handler_version))
+				handlers[x] = new_handler_module
+			except:
+				print("Failed updating to new version of '{0}'".format(handlers[x].description))
 				exit()
 
 		# attach handler-specific arguments
 		handlers[x].attach_arguments(argparser)
+		print("loaded {0}".format(handlers[x].handler_version))
 
 	output_dir = os.getcwd()
 
