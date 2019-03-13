@@ -5,4 +5,4 @@ opencv-python>=3.4.0.12
 pymediainfo>=2.2.1
 termcolor>=1.1.0
 python-magic>=0.4.15
-requests==2.18.4
+requests>=2.18.4

@@ -1,4 +1,4 @@
-import math, io, os
+import math, io, os, sys
 import cv2
 from termcolor import colored, cprint
 import magic
@@ -7,7 +7,7 @@ from config import blacklist_file_extensions, blacklist_path_matches
 
 def error(msg):
 	cprint(msg, 'red')
-	exit(1)
+	sys.exit(1)
 
 def imgKeyVariance(item):
 	return item[1]
