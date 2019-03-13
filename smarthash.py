@@ -10,6 +10,8 @@ import colorama
 import imdb
 import mutagen
 
+import requests, configparser, basehandler
+
 import MIFormat
 from functions import *
 from config import *
@@ -44,7 +46,7 @@ if __name__ == "__main__":
 
 		if not hasattr(handlers[x], 'handle'):
 			print("Could not import \"{0}\" handler".format(x))
-			exit()
+			sys.exit(1)
 
 
 		new_handler_src = handlers[x].get_update(smarthash_version)
@@ -61,11 +63,10 @@ if __name__ == "__main__":
 				handlers[x] = new_handler_module
 			except:
 				print("Failed updating to new version of '{0}'".format(handlers[x].description))
-				exit()
+				sys.exit(1)
 
 		# attach handler-specific arguments
 		handlers[x].attach_arguments(argparser)
-		print("loaded {0}".format(handlers[x].handler_version))
 
 	output_dir = os.getcwd()
 
@@ -73,7 +74,7 @@ if __name__ == "__main__":
 
 	if args.handler not in handlers:
 		print("Invalid handler: {0}".format(args.handler))
-		exit()
+		sys.exit(1)
 
 	handlers[args.handler].check_parameters(args)
 
@@ -85,7 +86,7 @@ if __name__ == "__main__":
 	# check absolute
 	if not os.path.isdir(path):
 		cprint("Path does not exist, or is not a directory", 'red')
-		exit()
+		sys.exit(1)
 
 	file_list = listFiles(path)
 
@@ -189,7 +190,7 @@ if __name__ == "__main__":
 		imdb_movie = imdb_site.get_movie(imdb_id)
 		if not imdb_movie:
 			cprint("Invalid IMDb ID: {0}".format(imdb_id), "red")
-			exit()
+			sys.exit(1)
 		print("IMDb verified: \"{0}\"".format(imdb_movie))
 
 		genre = choose_genre(imdb_movie['genres'])
@@ -280,7 +281,7 @@ if __name__ == "__main__":
 			# check if the output path exists
 			if not os.path.isdir(os.path.dirname(data['save_path'])):
 				cprint("Output path {0} does not exist".format(os.path.dirname(data['save_path'])), "red")
-				exit()
+				sys.exit(1)
 
 
 	handlers[args.handler].handle(data)
