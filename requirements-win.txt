@@ -6,6 +6,7 @@ pymediainfo>=2.2.1
 termcolor>=1.1.0
 python-magic>=0.4.15
 requests>=2.18.4
+bitstring>=3.1.5
 python-magic-bin>=0.4.14
 pypiwin32>=223
 PyInstaller>=3.4

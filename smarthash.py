@@ -10,7 +10,7 @@ import colorama
 import imdb
 import mutagen
 
-import requests, configparser, basehandler
+import requests, configparser, basehandler, bitstring
 
 import MIFormat
 from functions import *
@@ -76,7 +76,8 @@ if __name__ == "__main__":
 		print("Invalid handler: {0}".format(args.handler))
 		sys.exit(1)
 
-	handlers[args.handler].check_parameters(args)
+	handlers[args.handler].validate_settings()
+	handlers[args.handler].validate_parameters(args)
 
 	path = os.path.abspath(args.path)
 
@@ -126,6 +127,7 @@ if __name__ == "__main__":
 
 			# extract audio tags
 			if mime_prefix == "audio" or ext in whitelist_audio_extensions:
+				smarthash_info['mp3_info'] = Mp3Info(file_path)
 				smarthash_info['tags'] = OrderedDict()
 
 				mutagen_file = mutagen.File(file_path)	# easy=True
