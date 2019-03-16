@@ -2,6 +2,7 @@ import math, io, os, sys
 import cv2
 from termcolor import colored, cprint
 import magic
+import bitstring
 
 from config import blacklist_file_extensions, blacklist_path_matches
 
@@ -143,3 +144,64 @@ def get_mime_type(path):
 	except:
 		pass
 	return mime_type
+
+def Mp3Info(path):
+
+	results = {}
+
+	stream = bitstring.ConstBitStream(filename=path)
+
+	# look for Xing
+	Xing = stream.find("0x58696E67", bytealigned=True)
+
+	if Xing:
+		results['method'] = "VBR"
+		stream.bytepos += 4
+		xing_flags = stream.read("uint:32")
+		if xing_flags & 1:					# skip frames field
+			stream.bytepos += 4
+		if xing_flags & 2:					# skip bytes field
+			stream.bytepos += 4
+		if xing_flags & 4:					# skip TOC
+			stream.bytepos += 100
+		if xing_flags & 8:
+			xing_vbr_quality = stream.read("uint:32")
+			results['xing_vbr_v'] = 10 - math.ceil(xing_vbr_quality/10)
+			results['xing_vbr_q'] = 10 - xing_vbr_quality % 10
+
+		# LAME versions < 3.90 do not contain encoder info, and will not be picked up by this. Treat as VBR
+		lame_version = stream.read("bytes:9")
+		if lame_version[0:4] == b"LAME":
+
+			# allow for broken/hacked LAME versions, treat as regular VBR
+			try:
+				results['lame_version'] = lame_version[4:].decode().strip()
+				results['lame_tag_revision'] = stream.read("uint:4")
+				results['lame_vbr_method'] = stream.read("uint:4")
+				stream.bytepos += 9
+				results['lame_nspsytune'] = stream.read("bool")
+				results['lame_nssafejoint'] = stream.read("bool")
+				results['lame_nogap_next'] = stream.read("bool")
+				results['lame_nogap_previous'] = stream.read("bool")
+
+				if results['lame_version'][-1] == ".":
+					results['lame_version'] = results['lame_version'][:-1]
+			except:
+				results['method'] = "VBR"
+
+		return results
+
+	Info = stream.find("0x496E666F", bytealigned=True)
+	if Info:
+		results['method'] = "CBR"
+		return results
+
+	VBRI = stream.find("0x56425249", bytealigned=True)
+	if VBRI:
+		results['method'] = "VBR"
+		return results
+
+	# Assume CBR...
+	results['method'] = "CBR"
+
+	return results
