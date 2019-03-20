@@ -135,8 +135,11 @@ if __name__ == "__main__":
 				tags = {}
 				for k in mutagen_file:
 					# filter out >1500 char (presumably binary) tags, except for comment/lyrics
-					if len(str(mutagen_file[k])) < 1500 or k in ["USLT", "COMM"]: 
-						tags[k] = str(mutagen_file[k])
+					if len(str(mutagen_file[k])) < 1500 or k in ["USLT", "COMM"]:
+						if isinstance(mutagen_file[k], list):
+							tags[k] = [str(x) for x in mutagen_file[k]]
+						else:
+							tags[k] = str(mutagen_file[k])
 
 				for tag in sorted(tags):
 					smarthash_info['tags'][tag] = tags[tag]
