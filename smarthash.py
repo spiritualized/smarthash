@@ -127,7 +127,6 @@ if __name__ == "__main__":
 
 			# extract audio tags
 			if mime_prefix == "audio" or ext in whitelist_audio_extensions:
-				smarthash_info['mp3_info'] = Mp3Info(file_path)
 				smarthash_info['tags'] = OrderedDict()
 
 				mutagen_file = mutagen.File(file_path)	# easy=True
@@ -143,6 +142,10 @@ if __name__ == "__main__":
 
 				for tag in sorted(tags):
 					smarthash_info['tags'][tag] = tags[tag]
+
+			# Xing frame info
+			if mime_type == "audio/mpeg" or ext == ".mp3":
+				smarthash_info['mp3_info'] = Mp3Info(file_path)
 
 			# count the number of video files
 			if (mime_prefix == "video" or ext in whitelist_video_extensions) and ext not in blacklist_media_extensions:
