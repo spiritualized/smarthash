@@ -10,7 +10,7 @@ import colorama
 import imdb
 import mutagen
 
-import requests, configparser, basehandler, bitstring
+import requests, configparser, baseplugin, bitstring
 
 import MIFormat
 from functions import *
@@ -23,61 +23,61 @@ if __name__ == "__main__":
 
 	colorama.init()
 
-	# list the handler directory for external imports
-	handler_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "Handlers")
-	handler_filenames = [f for f in os.listdir(handler_path) if os.path.isfile(os.path.join(handler_path, f))]
-	handler_filenames = [ f.split(".")[0] for f in handler_filenames if f.endswith(".py") ]
+	# list the plugin directory for external imports
+	plugin_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "Plugins")
+	plugin_filenames = [f for f in os.listdir(plugin_path) if os.path.isfile(os.path.join(plugin_path, f))]
+	plugin_filenames = [ f.split(".")[0] for f in plugin_filenames if f.endswith(".py") ]
 
-	if os.path.exists(os.path.join(handler_path, '__temp__.py')):
-		os.remove(os.path.join(handler_path, '__temp__.py'))
+	if os.path.exists(os.path.join(plugin_path, '__temp__.py')):
+		os.remove(os.path.join(plugin_path, '__temp__.py'))
 
 	# basic parameters
 	argparser = argparse.ArgumentParser()
 	argparser.add_argument("path")
 	argparser.add_argument('--version', action='version', version="SmartHash {0}".format(smarthash_version))
-	argparser.add_argument("--handler", help="specify a manual output script: "+", ".join(handler_filenames), default="default")
+	argparser.add_argument("--plugin", help="specify a manual output script: "+", ".join(plugin_filenames), default="default")
 	argparser.add_argument("--destination", help="specify a file destination")
 	argparser.add_argument("--nfo-path", help="specify a nfo file/folder path manually")
 
-	handlers = {}
+	plugins = {}
 
-	for x in handler_filenames:
-		handlers[x] = importlib.import_module("Handlers."+x).TorrentHandler()
+	for x in plugin_filenames:
+		plugins[x] = importlib.import_module("Plugins."+x).SmarthashPlugin()
 
-		if not hasattr(handlers[x], 'handle'):
-			print("Could not import \"{0}\" handler".format(x))
+		if not hasattr(plugins[x], 'handle'):
+			print("Could not import \"{0}\" plugin".format(x))
 			sys.exit(1)
 
 
-		new_handler_src = handlers[x].get_update(smarthash_version)
+		new_plugin_src = plugins[x].get_update(smarthash_version)
 
-		if new_handler_src != "":
+		if new_plugin_src != "":
 			try:
-				with open(os.path.join(handler_path, '__temp__.py'), 'w+') as handler_file:
-					handler_file.write(new_handler_src)
-				new_handler_module = importlib.import_module("Handlers.__temp__").TorrentHandler()
+				with open(os.path.join(plugin_path, '__temp__.py'), 'w+') as plugin_file:
+					plugin_file.write(new_plugin_src)
+				new_plugin_module = importlib.import_module("Plugins.__temp__").SmarthashPlugin()
 
-				os.remove(os.path.join(handler_path, handlers[x].get_filename()))
-				os.rename(os.path.join(handler_path, new_handler_module.get_filename()), os.path.join(handler_path, handlers[x].get_filename()))
-				print("'{0}' handler updated from {1} to {2}".format(new_handler_module.description, handlers[x].handler_version, new_handler_module.handler_version))
-				handlers[x] = new_handler_module
+				os.remove(os.path.join(plugin_path, plugins[x].get_filename()))
+				os.rename(os.path.join(plugin_path, new_plugin_module.get_filename()), os.path.join(plugin_path, plugins[x].get_filename()))
+				print("'{0}' plugin updated from {1} to {2}".format(new_plugin_module.description, plugins[x].plugin_version, new_plugin_module.plugin_version))
+				plugins[x] = new_plugin_module
 			except:
-				print("Failed updating to new version of '{0}'".format(handlers[x].description))
+				print("Failed updating to new version of '{0}'".format(plugins[x].description))
 				sys.exit(1)
 
-		# attach handler-specific arguments
-		handlers[x].attach_arguments(argparser)
+		# attach plugin-specific arguments
+		plugins[x].attach_arguments(argparser)
 
 	output_dir = os.getcwd()
 
 	args = argparser.parse_args()
 
-	if args.handler not in handlers:
-		print("Invalid handler: {0}".format(args.handler))
+	if args.plugin not in plugins:
+		print("Invalid plugin: {0}".format(args.plugin))
 		sys.exit(1)
 
-	handlers[args.handler].validate_settings()
-	handlers[args.handler].validate_parameters(args)
+	plugins[args.plugin].validate_settings()
+	plugins[args.plugin].validate_parameters(args)
 
 	path = os.path.abspath(args.path)
 
@@ -190,7 +190,7 @@ if __name__ == "__main__":
 		imdb_id = args.imdb_id
 
 	# make sure the IMDb ID exists
-	if imdb_id and 'imdb-id' in handlers[args.handler].options:
+	if imdb_id and 'imdb-id' in plugins[args.plugin].options:
 		#imdb._logging.setLevel("error")
 		print('IMDb querying...\r', end='\r'),
 		imdb_site = imdb.IMDb()
@@ -204,7 +204,7 @@ if __name__ == "__main__":
 		genre = choose_genre(imdb_movie['genres'])
 
 
-	handlers[args.handler].early_validation(path, {'args':args, 'smarthash_info':smarthash_path_info, 'title':os.path.basename(path), 'imdb_id':imdb_id, 'genre':genre,})
+	plugins[args.plugin].early_validation(path, {'args':args, 'smarthash_info':smarthash_path_info, 'title':os.path.basename(path), 'imdb_id':imdb_id, 'genre':genre,})
 
 	params = {
 				'blacklist_file_extensions': [x.lower() for x in blacklist_file_extensions],
@@ -245,12 +245,12 @@ if __name__ == "__main__":
 				formatted_mediainfo += "\n{0}\n".format("-"*70)
 			formatted_mediainfo += MIFormat.MItostring(smarthash_path_info[os.path.join(os.path.basename(path), *file['path'])]['mediainfo'])
 
-			if "video-screenshots" in handlers[args.handler].options:
+			if "video-screenshots" in plugins[args.plugin].options:
 				extracted_images.append(extractImages(file_path, images_per_video_file))
 
 
 
-	# collect the dataset for the handler
+	# collect the dataset for the plugin
 	data = {	'smarthash_version': smarthash_version,
 				'args': args,
 				'path': path,
@@ -267,9 +267,9 @@ if __name__ == "__main__":
 	if genre:
 		data['genre'] = genre
 
-	# TODO move to handler
-	# output destination for default handler
-	if args.handler == "default":
+	# TODO move to plugin
+	# output destination for default plugin
+	if args.plugin == "default":
 		data['save_path'] = path + ".torrent"
 
 		# manual destination
@@ -292,6 +292,6 @@ if __name__ == "__main__":
 				sys.exit(1)
 
 
-	handlers[args.handler].handle(data)
+	plugins[args.plugin].handle(data)
 
 	cprint("Done{0}\n".format(" "*40), 'green', end='\r')

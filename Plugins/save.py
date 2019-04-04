@@ -1,8 +1,8 @@
-from basehandler import BaseHandler
+from baseplugin import BasePlugin
 import os
 
 
-class TorrentHandler(BaseHandler):
+class SmarthashPlugin(BasePlugin):
 
 	description = "Writes extracted data out to a folder"
 	options = ['video-screenshots']

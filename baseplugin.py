@@ -1,7 +1,7 @@
 import os, sys
 
 
-class BaseHandler:
+class BasePlugin:
 
 	handler_version = "1.0.0"
 	description = ""
