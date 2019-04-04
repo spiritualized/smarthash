@@ -127,7 +127,7 @@ def listFiles(parent_dir):
 def listFilesInner(parent, path, file_list):
 	for curr in os.scandir(os.path.join(parent, path)):
 		if curr.is_file():
-			file_list.append(os.path.relpath(os.path.join(path, curr)))
+			file_list.append(os.path.relpath(os.path.join(path, curr.path)))
 		elif curr.is_dir():
 			listFilesInner(parent, curr, file_list)
 
