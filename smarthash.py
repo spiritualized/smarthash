@@ -185,12 +185,13 @@ if __name__ == "__main__":
 	if len(nfos) > 0 and not imdb_id:
 		nfo = nfos[0]
 
-	# manual imdb_id override
-	if args.imdb_id:
-		imdb_id = args.imdb_id
-
 	# make sure the IMDb ID exists
 	if imdb_id and 'imdb-id' in plugins[args.plugin].options:
+		
+		# manual imdb_id override
+		if args.imdb_id:
+			imdb_id = args.imdb_id
+
 		#imdb._logging.setLevel("error")
 		print('IMDb querying...\r', end='\r'),
 		imdb_site = imdb.IMDb()
