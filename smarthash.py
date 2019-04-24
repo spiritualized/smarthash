@@ -23,8 +23,13 @@ if __name__ == "__main__":
 
     colorama.init()
 
+    # get the root directory
+    root_dir = os.path.dirname(os.path.abspath(__file__))
+    if getattr(sys, 'frozen', False):
+        root_dir = sys._MEIPASS
+
     # list the plugin directory for external imports
-    plugin_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "Plugins")
+    plugin_path = os.path.join(root_dir, "Plugins")
     plugin_filenames = [f for f in os.listdir(plugin_path) if os.path.isfile(os.path.join(plugin_path, f))]
     plugin_filenames = [ f.split(".")[0] for f in plugin_filenames if f.endswith(".py") ]
 
