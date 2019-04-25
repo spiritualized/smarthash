@@ -122,12 +122,14 @@ def listFiles(parent_dir):
                 file_list.remove(file)
                 continue
 
+    file_list = [os.path.join(os.path.split(parent_dir)[-1], f) for f in file_list]
+
     return file_list
 
 def listFilesInner(parent, path, file_list):
     for curr in os.scandir(os.path.join(parent, path)):
         if curr.is_file():
-            file_list.append(os.path.relpath(os.path.join(path, curr.path)))
+            file_list.append(os.path.relpath(os.path.join(path, curr.path), parent))
         elif curr.is_dir():
             listFilesInner(parent, curr, file_list)
 
