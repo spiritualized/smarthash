@@ -176,7 +176,8 @@ def MItostring(mediainfo):
             out += MIFormatLine("ID", track['track_id'])
             out += MIFormatLine("Format", track['format'])
             out += MIFormatLine("Codec ID", track['codec_id'])
-            out += MIFormatLine("Codec ID/Info", track['codec_info'])
+            if 'codec_info' in track:
+                out += MIFormatLine("Codec ID/Info", track['codec_info'])
             if 'other_duration' in track:
                 out += MIFormatLine("Duration", track['other_duration'][0])
             if 'other_bit_rate' in track:
