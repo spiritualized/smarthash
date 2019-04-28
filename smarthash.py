@@ -191,7 +191,7 @@ if __name__ == "__main__":
         nfo = nfos[0]
 
     # make sure the IMDb ID exists
-    if imdb_id and 'imdb-id' in plugins[args.plugin].options:
+    if imdb_id or 'imdb-id' in plugins[args.plugin].options:
 
         # manual imdb_id override
         if args.imdb_id:
