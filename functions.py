@@ -131,7 +131,7 @@ def listFilesInner(parent, path, file_list):
         if curr.is_file():
             file_list.append(os.path.relpath(os.path.join(path, curr.path), parent))
         elif curr.is_dir():
-            listFilesInner(parent, curr.path, file_list)
+            listFilesInner(parent, curr, file_list)
 
 
 def prog(amount):
