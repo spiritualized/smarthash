@@ -242,11 +242,12 @@ if __name__ == "__main__":
     # extract MediaInfo
     for file in metainfo['info']['files']:
         file_path = os.path.join(path, *file['path'])
+        ext = os.path.splitext(file_path)[1].lower()
         mime_type = get_mime_type(file_path)
         mime_prefix = mime_type.split("/")[0]
 
         # for video files, compose a standard(ish) MediaInfo text output
-        if mime_prefix == "video" or ext in whitelist_video_extensions:
+        if (mime_prefix == "video" or ext in whitelist_video_extensions) and ext not in blacklist_media_extensions:
             if formatted_mediainfo != "":
                 formatted_mediainfo += "\n{0}\n".format("-"*70)
             formatted_mediainfo += MIFormat.MItostring(smarthash_path_info[os.path.join(os.path.basename(path), *file['path'])]['mediainfo'])
