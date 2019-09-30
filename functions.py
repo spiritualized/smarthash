@@ -142,7 +142,7 @@ def get_mime_type(path):
     mime_type = ''
     try:
         with open(path, 'rb') as infile:
-            return magic.from_buffer(infile.read(), mime=True)
+            return magic.from_buffer(infile.read(1048576), mime=True)
     except:
         pass
     return mime_type

@@ -17,7 +17,7 @@ import MIFormat
 from functions import *
 from config import *
 
-smarthash_version = "2.0.3"
+smarthash_version = "2.1.0"
 
 
 if __name__ == "__main__":
@@ -244,7 +244,8 @@ if __name__ == "__main__":
     for file in metainfo['info']['files']:
         file_path = os.path.join(path, *file['path'])
         ext = os.path.splitext(file_path)[1].lower()
-        mime_type = get_mime_type(file_path)
+        path_key = os.path.join(metainfo['info']['name'], *file['path'])
+        mime_type = smarthash_path_info[path_key]['mime_type'] if path_key in smarthash_path_info else get_mime_type(file_path)
         mime_prefix = mime_type.split("/")[0]
 
         # for video files, compose a standard(ish) MediaInfo text output
