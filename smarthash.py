@@ -1,3 +1,4 @@
+import logging
 import os, sys, importlib, imp, inspect, json, math, re
 from collections import OrderedDict
 
@@ -50,7 +51,7 @@ if __name__ == "__main__":
         plugins[x] = importlib.import_module("Plugins."+x).SmarthashPlugin()
 
         if not hasattr(plugins[x], 'handle'):
-            print("Could not import \"{0}\" plugin".format(x))
+            logging.error("Could not import \"{0}\" plugin".format(x))
             sys.exit(1)
 
 
@@ -78,7 +79,7 @@ if __name__ == "__main__":
     args = argparser.parse_args()
 
     if args.plugin not in plugins:
-        print("Invalid plugin: {0}".format(args.plugin))
+        logging.error("Invalid plugin: {0}".format(args.plugin))
         sys.exit(1)
 
     plugins[args.plugin].validate_settings()
@@ -87,7 +88,7 @@ if __name__ == "__main__":
     path = os.path.abspath(args.path)
 
 
-    print("----------------------------\n{0}".format(path))
+    logging.info("----------------------------\n{0}".format(path))
 
     # check absolute
     if not os.path.isdir(path):
@@ -181,7 +182,7 @@ if __name__ == "__main__":
     nfo = ''
 
     for curr_nfo in nfos:
-        imdb_id_match = re.findall(r"imdb\.com/title/tt(\d{7})", curr_nfo)
+        imdb_id_match = re.findall(r"imdb\.com/title/tt(\d{7}\d?)", curr_nfo)
         if imdb_id_match:
             imdb_id = imdb_id_match[0]
             nfo = curr_nfo
@@ -205,7 +206,7 @@ if __name__ == "__main__":
         if not imdb_movie:
             cprint("Invalid IMDb ID: {0}".format(imdb_id), "red")
             sys.exit(1)
-        print("IMDb verified: \"{0}\"".format(imdb_movie))
+        logging.info("IMDb verified: \"{0}\"".format(imdb_movie))
 
         genre = choose_genre(imdb_movie['genres'])
 
