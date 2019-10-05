@@ -108,7 +108,7 @@ def extractImages(path, n):
 
 def listFiles(parent_dir):
     file_list = []
-    listFilesInner(parent_dir, '', file_list)
+    listFilesInner(parent_dir, None, file_list)
 
     for x in blacklist_path_matches:
         for file in file_list:
@@ -127,9 +127,10 @@ def listFiles(parent_dir):
     return file_list
 
 def listFilesInner(parent, path, file_list):
-    for curr in os.scandir(os.path.join(parent, path)):
+    joined_path = os.path.join(parent, path) if path else parent
+    for curr in os.scandir(joined_path):
         if curr.is_file():
-            file_list.append(os.path.relpath(os.path.join(path, curr.path), parent))
+            file_list.append(os.path.relpath(curr.path, parent))
         elif curr.is_dir():
             listFilesInner(parent, curr.path, file_list)
 
