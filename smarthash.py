@@ -31,7 +31,7 @@ if __name__ == "__main__":
 
     # list the plugin directory for external imports
     plugin_path = os.path.join(root_dir, "Plugins")
-    plugin_filenames = [f for f in os.listdir(plugin_path) if os.path.isfile(os.path.join(plugin_path, f))]
+    plugin_filenames = [str(f) for f in os.listdir(plugin_path) if os.path.isfile(os.path.join(plugin_path, f))]
     plugin_filenames = [ f.split(".")[0] for f in plugin_filenames if f.endswith(".py") ]
 
     if os.path.exists(os.path.join(plugin_path, '__temp__.py')):
