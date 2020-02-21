@@ -190,10 +190,11 @@ if __name__ == "__main__":
     # default nfo
     if len(nfos) > 0 and not imdb_id:
         nfo = nfos[0]
-
-    # manual imdb_id override
-    if args.imdb_id:
+    
+    try:
         imdb_id = args.imdb_id
+    except AttributeError:
+        pass
 
     # make sure the IMDb ID exists
     if imdb_id and 'imdb-id' in plugins[args.plugin].options:
@@ -211,14 +212,14 @@ if __name__ == "__main__":
         genre = choose_genre(imdb_movie['genres'])
 
 
-    plugins[args.plugin].early_validation(path, {'args':args, 'smarthash_info':smarthash_path_info, 'title':os.path.basename(path), 'imdb_id':imdb_id, 'genre':genre,})
-
     params = {
                 'blacklist_file_extensions': [x.lower() for x in blacklist_file_extensions],
                 'blacklist_path_matches': [x.lower() for x in blacklist_path_matches],
                 'comment': "Generated with SmartHash {0}".format(smarthash_version),
                 'smarthash_version': smarthash_version,
     }
+
+    plugins[args.plugin].early_validation(path, {'args':args, 'smarthash_info':smarthash_path_info, 'title':os.path.basename(path), 'imdb_id':imdb_id, 'genre':genre, 'params':params})
 
     # hash the folder
     metainfo = make_meta_file(path, None, params=params, progress=prog)
