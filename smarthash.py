@@ -17,7 +17,7 @@ import MIFormat
 from functions import *
 from config import *
 
-smarthash_version = "2.1.0"
+smarthash_version = "2.2.0"
 
 if __name__ == "__main__":
 
