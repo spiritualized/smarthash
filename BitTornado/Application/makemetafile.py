@@ -54,6 +54,34 @@ def make_meta_file(loc, url, params=None, flag=None,
 
     tree = BTTree(loc, [])
 
+    def valid_file(file_obj):
+        path = [x2.lower() for x2 in file_obj.path]
+
+        # Check if any of the file/foldernames contain a blacklisted word
+        for pathsegment in path:
+            for match in params['blacklist_path_matches']:
+                if pathsegment.startswith(match):
+                    return False
+
+        # Check if the file is on the extension blacklist
+        if path[-1].endswith(tuple(params['blacklist_file_extensions'])):
+            return False
+
+        return True
+
+    def remove_invalid_files(node):
+        if not node.subs:
+            if valid_file(node):
+                return node
+            return None
+        node.subs = [t for t in [remove_invalid_files(sub) for sub in node.subs] if t is not None]
+        node.size = sum(sub.size for sub in node.subs)
+        if node.subs:
+            return node
+        return None
+
+    remove_invalid_files(tree)
+
     # Extract target from parameters
     if 'target' not in params or params['target'] == '':
         fname, ext = os.path.split(loc)
@@ -65,22 +93,6 @@ def make_meta_file(loc, url, params=None, flag=None,
 
     info = tree.makeInfo(flag=flag, progress=progress,
                          progress_percent=progress_percent, **params)
-
-    # Purge stuff we don't want
-    for x in list(info['files']):
-        path = [x2.lower() for x2 in x['path']]
-
-        # Check if any of the file/foldernames contain a blacklisted word
-        for pathsegment in path:
-            for match in params['blacklist_path_matches']:
-                if pathsegment.startswith(match):
-                    info['files'].remove(x)
-                    continue
-
-        # Check if the file is on the extension blacklist
-        if path[-1].endswith(tuple(params['blacklist_file_extensions'])):
-            info['files'].remove(x)
-            continue
 
     if flag is not None and flag.is_set():
         return
