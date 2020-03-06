@@ -16,10 +16,10 @@ elif platform.system() == "Linux":
 
 a = Analysis(['smarthash.py'],
              pathex=[],
-             binaries=additional_binaries,
+             binaries=[],
              datas=[('Plugins', 'Plugins')],
              hiddenimports=[],
-             hookspath=[],
+             hookspath=['hooks'],
              runtime_hooks=[],
              excludes=[],
              win_no_prefer_redirects=False,
