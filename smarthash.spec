@@ -5,9 +5,7 @@ block_cipher = None
 
 additional_binaries = []
 
-if platform.system() == "Windows":
-    additional_binaries = [('MediaInfo.dll', '.')]
-elif platform.system() == "Linux":
+if platform.system() == "Linux":
     additional_binaries=[
         ('/usr/lib/x86_64-linux-gnu/libmediainfo.so.0', '.'),
         ('/usr/lib/x86_64-linux-gnu/libzen.so.0', '.'),
