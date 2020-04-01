@@ -3,15 +3,6 @@ import platform
 
 block_cipher = None
 
-additional_binaries = []
-
-if platform.system() == "Linux":
-    additional_binaries=[
-        ('/usr/lib/x86_64-linux-gnu/libmediainfo.so.0', '.'),
-        ('/usr/lib/x86_64-linux-gnu/libzen.so.0', '.'),
-        ('/usr/lib/x86_64-linux-gnu/libmms.so.0', '.'),
-        ('/usr/lib/x86_64-linux-gnu/libtinyxml2.so.2', '.')]
-
 a = Analysis(['smarthash.py'],
              pathex=[],
              binaries=[],
