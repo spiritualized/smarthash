@@ -44,6 +44,32 @@ httpseeds = optional list of http-seed URLs, in the format:
         url[|url...]"""
 
 
+def is_file_valid(file_obj, params):
+    path = [x2.lower() for x2 in file_obj.path]
+
+    # Check if any of the file/foldernames contain a blacklisted word
+    for pathsegment in path:
+        for match in params['blacklist_path_matches']:
+            if pathsegment.startswith(match):
+                return False
+
+    # Check if the file is on the extension blacklist
+    if path[-1].endswith(tuple(params['blacklist_file_extensions'])):
+        return False
+
+    return True
+
+def remove_invalid_files(node, params):
+    if not node.subs:
+        if is_file_valid(node, params):
+            return node
+        return None
+    node.subs = [t for t in [remove_invalid_files(sub, params) for sub in node.subs] if t is not None]
+    node.size = sum(sub.size for sub in node.subs)
+    if node.subs:
+        return node
+    return None
+
 def make_meta_file(loc, url, params=None, flag=None,
                    progress=lambda x: None, progress_percent=True):
     """Make a single .torrent file for a given location"""
@@ -54,33 +80,7 @@ def make_meta_file(loc, url, params=None, flag=None,
 
     tree = BTTree(loc, [])
 
-    def valid_file(file_obj):
-        path = [x2.lower() for x2 in file_obj.path]
-
-        # Check if any of the file/foldernames contain a blacklisted word
-        for pathsegment in path:
-            for match in params['blacklist_path_matches']:
-                if pathsegment.startswith(match):
-                    return False
-
-        # Check if the file is on the extension blacklist
-        if path[-1].endswith(tuple(params['blacklist_file_extensions'])):
-            return False
-
-        return True
-
-    def remove_invalid_files(node):
-        if not node.subs:
-            if valid_file(node):
-                return node
-            return None
-        node.subs = [t for t in [remove_invalid_files(sub) for sub in node.subs] if t is not None]
-        node.size = sum(sub.size for sub in node.subs)
-        if node.subs:
-            return node
-        return None
-
-    remove_invalid_files(tree)
+    remove_invalid_files(tree, params)
 
     # Extract target from parameters
     if 'target' not in params or params['target'] == '':
