@@ -1,9 +1,12 @@
 colorama>=0.3.9
 IMDbPY>=6.5
 mutagen>=1.40.0
-opencv-python>=3.4.0.12
+opencv-python-headless>=3.4.0.12
 pymediainfo>=2.2.1
 termcolor>=1.1.0
 python-magic>=0.4.15
 requests>=2.18.4
 bitstring>=3.1.5
+PyInstaller>=3.4
+python-magic-bin>=0.4.14 ; sys_platform == 'win32' or sys_platform == 'darwin'
+pypiwin32>=223 ; sys_platform == 'win32'
