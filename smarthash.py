@@ -192,25 +192,24 @@ if __name__ == "__main__":
     if len(nfos) > 0 and not imdb_id:
         nfo = nfos[0]
 
-    if 'imdb-id' in plugins[args.plugin].options:
+    if 'imdb-id' in plugins[args.plugin].options and args.imdb_id:
         # manual imdb_id override
-        if args.imdb_id:
-            imdb_id = args.imdb_id
+        imdb_id = args.imdb_id
 
-        # make sure the IMDb ID exists
-        if imdb_id:
+    # make sure the IMDb ID exists
+    if imdb_id:
 
-            # imdb._logging.setLevel("error")
-            print('IMDb querying...\r', end='\r'),
-            imdb_site = imdb.IMDb()
+        # imdb._logging.setLevel("error")
+        print('IMDb querying...\r', end='\r'),
+        imdb_site = imdb.IMDb()
 
-            imdb_movie = imdb_site.get_movie(imdb_id)
-            if not imdb_movie:
-                cprint("Invalid IMDb ID: {0}".format(imdb_id), "red")
-                sys.exit(1)
-            logging.info("IMDb verified: \"{0}\"".format(imdb_movie))
+        imdb_movie = imdb_site.get_movie(imdb_id)
+        if not imdb_movie:
+            cprint("Invalid IMDb ID: {0}".format(imdb_id), "red")
+            sys.exit(1)
+        logging.info("IMDb verified: \"{0}\"".format(imdb_movie))
 
-            genre = choose_genre(imdb_movie['genres'])
+        genre = choose_genre(imdb_movie['genres'])
 
     params = {
         'blacklist_file_extensions': [x.lower() for x in blacklist_file_extensions],
