@@ -17,8 +17,7 @@ import MIFormat
 from functions import *
 from config import *
 
-smarthash_version = "2.1.0"
-
+smarthash_version = "2.2.0"
 
 if __name__ == "__main__":
 
@@ -32,7 +31,7 @@ if __name__ == "__main__":
     # list the plugin directory for external imports
     plugin_path = os.path.join(root_dir, "Plugins")
     plugin_filenames = [f for f in os.listdir(plugin_path) if os.path.isfile(os.path.join(plugin_path, f))]
-    plugin_filenames = [ f.split(".")[0] for f in plugin_filenames if f.endswith(".py") ]
+    plugin_filenames = [f.split(".")[0] for f in plugin_filenames if f.endswith(".py")]
 
     if os.path.exists(os.path.join(plugin_path, '__temp__.py')):
         os.remove(os.path.join(plugin_path, '__temp__.py'))
@@ -41,19 +40,19 @@ if __name__ == "__main__":
     argparser = argparse.ArgumentParser()
     argparser.add_argument("path")
     argparser.add_argument('--version', action='version', version="SmartHash {0}".format(smarthash_version))
-    argparser.add_argument("--plugin", help="specify a manual output script: "+", ".join(plugin_filenames), default="default")
+    argparser.add_argument("--plugin", help="specify a manual output script: " + ", ".join(plugin_filenames),
+                           default="default")
     argparser.add_argument("--destination", help="specify a file destination")
     argparser.add_argument("--nfo-path", help="specify a nfo file/folder path manually")
 
     plugins = {}
 
     for x in plugin_filenames:
-        plugins[x] = importlib.import_module("Plugins."+x).SmarthashPlugin()
+        plugins[x] = importlib.import_module("Plugins." + x).SmarthashPlugin()
 
         if not hasattr(plugins[x], 'handle'):
             logging.error("Could not import \"{0}\" plugin".format(x))
             sys.exit(1)
-
 
         new_plugin_src = plugins[x].get_update(smarthash_version)
 
@@ -64,8 +63,11 @@ if __name__ == "__main__":
                 new_plugin_module = importlib.import_module("Plugins.__temp__").SmarthashPlugin()
 
                 os.remove(os.path.join(plugin_path, plugins[x].get_filename()))
-                os.rename(os.path.join(plugin_path, new_plugin_module.get_filename()), os.path.join(plugin_path, plugins[x].get_filename()))
-                print("'{0}' plugin updated from {1} to {2}".format(new_plugin_module.description, plugins[x].plugin_version, new_plugin_module.plugin_version))
+                os.rename(os.path.join(plugin_path, new_plugin_module.get_filename()),
+                          os.path.join(plugin_path, plugins[x].get_filename()))
+                print("'{0}' plugin updated from {1} to {2}".format(new_plugin_module.description,
+                                                                    plugins[x].plugin_version,
+                                                                    new_plugin_module.plugin_version))
                 plugins[x] = new_plugin_module
             except:
                 print("Failed updating to new version of '{0}'".format(plugins[x].description))
@@ -86,7 +88,6 @@ if __name__ == "__main__":
     plugins[args.plugin].validate_parameters(args)
 
     path = os.path.abspath(args.path)
-
 
     logging.info("----------------------------\n{0}".format(path))
 
@@ -135,7 +136,7 @@ if __name__ == "__main__":
             if mime_prefix == "audio" or ext in whitelist_audio_extensions:
                 smarthash_info['tags'] = OrderedDict()
 
-                mutagen_file = mutagen.File(file_path)	# easy=True
+                mutagen_file = mutagen.File(file_path)  # easy=True
 
                 tags = {}
                 for k in mutagen_file:
@@ -191,14 +192,14 @@ if __name__ == "__main__":
     if len(nfos) > 0 and not imdb_id:
         nfo = nfos[0]
 
-    # manual imdb_id override
-    if args.imdb_id:
+    if 'imdb-id' in plugins[args.plugin].options and args.imdb_id:
+        # manual imdb_id override
         imdb_id = args.imdb_id
 
     # make sure the IMDb ID exists
-    if imdb_id and 'imdb-id' in plugins[args.plugin].options:
+    if imdb_id:
 
-        #imdb._logging.setLevel("error")
+        # imdb._logging.setLevel("error")
         print('IMDb querying...\r', end='\r'),
         imdb_site = imdb.IMDb()
 
@@ -210,15 +211,16 @@ if __name__ == "__main__":
 
         genre = choose_genre(imdb_movie['genres'])
 
-
-    plugins[args.plugin].early_validation(path, {'args':args, 'smarthash_info':smarthash_path_info, 'title':os.path.basename(path), 'imdb_id':imdb_id, 'genre':genre,})
-
     params = {
-                'blacklist_file_extensions': [x.lower() for x in blacklist_file_extensions],
-                'blacklist_path_matches': [x.lower() for x in blacklist_path_matches],
-                'comment': "Generated with SmartHash {0}".format(smarthash_version),
-                'smarthash_version': smarthash_version,
+        'blacklist_file_extensions': [x.lower() for x in blacklist_file_extensions],
+        'blacklist_path_matches': [x.lower() for x in blacklist_path_matches],
+        'comment': "Generated with SmartHash {0}".format(smarthash_version),
+        'smarthash_version': smarthash_version,
     }
+
+    plugins[args.plugin].early_validation(path, {'args': args, 'smarthash_info': smarthash_path_info,
+                                                 'title': os.path.basename(path), 'imdb_id': imdb_id, 'genre': genre,
+                                                 'params': params})
 
     # hash the folder
     metainfo = make_meta_file(path, None, params=params, progress=prog)
@@ -232,7 +234,7 @@ if __name__ == "__main__":
             file['smarthash_info'] = json.dumps(smarthash_path_info[file_path])
 
     images_per_video_file = 4
-    if num_video_files in [2,3]:
+    if num_video_files in [2, 3]:
         images_per_video_file = 2
     elif num_video_files > 3:
         images_per_video_file = 1
@@ -245,31 +247,31 @@ if __name__ == "__main__":
         file_path = os.path.join(path, *file['path'])
         ext = os.path.splitext(file_path)[1].lower()
         path_key = os.path.join(metainfo['info']['name'], *file['path'])
-        mime_type = smarthash_path_info[path_key]['mime_type'] if path_key in smarthash_path_info else get_mime_type(file_path)
+        mime_type = smarthash_path_info[path_key]['mime_type'] if path_key in smarthash_path_info else get_mime_type(
+            file_path)
         mime_prefix = mime_type.split("/")[0]
 
         # for video files, compose a standard(ish) MediaInfo text output
         if (mime_prefix == "video" or ext in whitelist_video_extensions) and ext not in blacklist_media_extensions:
             if formatted_mediainfo != "":
-                formatted_mediainfo += "\n{0}\n".format("-"*70)
-            formatted_mediainfo += MIFormat.MItostring(smarthash_path_info[os.path.join(os.path.basename(path), *file['path'])]['mediainfo'])
+                formatted_mediainfo += "\n{0}\n".format("-" * 70)
+            formatted_mediainfo += MIFormat.MItostring(
+                smarthash_path_info[os.path.join(os.path.basename(path), *file['path'])]['mediainfo'])
 
             if "video-screenshots" in plugins[args.plugin].options:
                 extracted_images.append(extractImages(file_path, images_per_video_file))
 
-
-
     # collect the dataset for the plugin
-    data = {	'smarthash_version': smarthash_version,
-                'args': args,
-                'path': path,
-                'title': os.path.split(path)[-1],
-                'total_duration': total_duration,
-                'mediainfo':formatted_mediainfo,
-                'extracted_images':extracted_images,
-                'torrent_file': metainfo.gettorrent(),
-                'nfo':nfo,
-    }
+    data = {'smarthash_version': smarthash_version,
+            'args': args,
+            'path': path,
+            'title': os.path.split(path)[-1],
+            'total_duration': total_duration,
+            'mediainfo': formatted_mediainfo,
+            'extracted_images': extracted_images,
+            'torrent_file': metainfo.gettorrent(),
+            'nfo': nfo,
+            }
 
     if imdb_id:
         data['imdb_id'] = imdb_id
@@ -300,7 +302,6 @@ if __name__ == "__main__":
                 cprint("Output path {0} does not exist".format(os.path.dirname(data['save_path'])), "red")
                 sys.exit(1)
 
-
     plugins[args.plugin].handle(data)
 
-    cprint("Done{0}\n".format(" "*40), 'green', end='\r')
+    cprint("Done{0}\n".format(" " * 40), 'green', end='\r')

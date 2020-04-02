@@ -44,6 +44,32 @@ httpseeds = optional list of http-seed URLs, in the format:
         url[|url...]"""
 
 
+def is_file_valid(file_obj, params):
+    path = [x2.lower() for x2 in file_obj.path]
+
+    # Check if any of the file/foldernames contain a blacklisted word
+    for pathsegment in path:
+        for match in params['blacklist_path_matches']:
+            if pathsegment.startswith(match):
+                return False
+
+    # Check if the file is on the extension blacklist
+    if path[-1].endswith(tuple(params['blacklist_file_extensions'])):
+        return False
+
+    return True
+
+def remove_invalid_files(node, params):
+    if not node.subs:
+        if is_file_valid(node, params):
+            return node
+        return None
+    node.subs = [t for t in [remove_invalid_files(sub, params) for sub in node.subs] if t is not None]
+    node.size = sum(sub.size for sub in node.subs)
+    if node.subs:
+        return node
+    return None
+
 def make_meta_file(loc, url, params=None, flag=None,
                    progress=lambda x: None, progress_percent=True):
     """Make a single .torrent file for a given location"""
@@ -53,6 +79,8 @@ def make_meta_file(loc, url, params=None, flag=None,
         flag = threading.Event()
 
     tree = BTTree(loc, [])
+
+    remove_invalid_files(tree, params)
 
     # Extract target from parameters
     if 'target' not in params or params['target'] == '':
@@ -65,22 +93,6 @@ def make_meta_file(loc, url, params=None, flag=None,
 
     info = tree.makeInfo(flag=flag, progress=progress,
                          progress_percent=progress_percent, **params)
-
-    # Purge stuff we don't want
-    for x in list(info['files']):
-        path = [x2.lower() for x2 in x['path']]
-
-        # Check if any of the file/foldernames contain a blacklisted word
-        for pathsegment in path:
-            for match in params['blacklist_path_matches']:
-                if pathsegment.startswith(match):
-                    info['files'].remove(x)
-                    continue
-
-        # Check if the file is on the extension blacklist
-        if path[-1].endswith(tuple(params['blacklist_file_extensions'])):
-            info['files'].remove(x)
-            continue
 
     if flag is not None and flag.is_set():
         return
