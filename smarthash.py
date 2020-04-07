@@ -1,5 +1,5 @@
 import logging
-import os, sys, importlib, imp, inspect, json, math, re
+import os, sys, importlib, inspect, json, math, re
 from collections import OrderedDict
 
 from BitTornado.Application.makemetafile import make_meta_file
