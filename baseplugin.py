@@ -19,7 +19,7 @@ class BasePlugin:
 	def get_update(self, smarthash_version):
 		return ""
 
-	def check_parameters(self, args):
+	def validate_parameters(self, args):
 		pass
 
 	def early_validation(self, path, data):
