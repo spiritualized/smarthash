@@ -1,7 +1,9 @@
 import os, sys
 
+from pluginmixin import PluginMixin
 
-class BasePlugin:
+
+class BasePlugin(PluginMixin):
 
 	handler_version = "1.0.0"
 	description = ""
@@ -11,9 +13,6 @@ class BasePlugin:
 		return os.path.basename(sys.modules[self.__module__].__file__)
 
 	def validate_settings(self):
-		pass
-
-	def attach_arguments(self, argparser):
 		pass
 
 	def get_update(self, smarthash_version):
