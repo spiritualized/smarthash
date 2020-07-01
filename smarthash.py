@@ -46,6 +46,7 @@ if __name__ == "__main__":
     argparser.add_argument("--nfo-path", help="specify a nfo file/folder path manually")
 
     plugins = {}
+    unique_arguments = {}
 
     for x in plugin_filenames:
         plugins[x] = importlib.import_module("Plugins." + x).SmarthashPlugin()
@@ -73,8 +74,20 @@ if __name__ == "__main__":
                 print("Failed updating to new version of '{0}'".format(plugins[x].description))
                 sys.exit(1)
 
-        # attach plugin-specific arguments
-        plugins[x].attach_arguments(argparser)
+        # store unique argparse argument registrations
+        for arg in plugins[x].arguments:
+            if arg.argument not in unique_arguments:
+                unique_arguments[arg.argument] = arg.kwargs
+
+            elif 'help' in unique_arguments[arg.argument] and 'help' in arg.kwargs \
+                    and unique_arguments[arg.argument]['help'] != arg.kwargs['help']:
+                logging.warning("Ignoring argument from plugin '{plugin}': {arg}"
+                                .format(plugin=plugins[x].description, arg=arg.argument))
+
+    # register arguments with argparse
+    for arg in unique_arguments:
+        argparser.add_argument(arg, **unique_arguments[arg])
+
 
     output_dir = os.getcwd()
 
