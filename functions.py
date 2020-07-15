@@ -3,11 +3,24 @@ import cv2
 from termcolor import colored, cprint
 import magic
 import bitstring
+import json
 
 from config import blacklist_file_extensions, blacklist_path_matches
 
 def error(msg):
-    cprint(msg, 'red')
+    try:
+        decoded = json.loads(msg)
+        if 'errors' in decoded:
+            if len(decoded['errors']) > 1:
+                cprint("Error:", 'red')
+                for error in decoded['errors']:
+                    cprint(error, 'red')
+            else:
+                cprint("Error: {0}".format(decoded['errors'][0]), 'red')
+
+    except ValueError:
+        cprint(msg, 'red')
+
     sys.exit(1)
 
 def imgKeyVariance(item):
@@ -158,6 +171,7 @@ def Mp3Info(path):
     Xing = stream.find("0x58696E67", bytealigned=True)
 
     if Xing:
+        results['xing_header'] = "XING"
         results['method'] = "VBR"
         stream.bytepos += 4
         xing_flags = stream.read("uint:32")
@@ -175,6 +189,7 @@ def Mp3Info(path):
         # LAME versions < 3.90 do not contain encoder info, and will not be picked up by this. Treat as VBR
         lame_version = stream.read("bytes:9")
         if lame_version[0:4] == b"LAME":
+            results['xing_header'] = "LAME"
 
             # allow for broken/hacked LAME versions, treat as regular VBR
             try:
@@ -196,11 +211,13 @@ def Mp3Info(path):
 
     Info = stream.find("0x496E666F", bytealigned=True)
     if Info:
+        results['xing_header'] = "INFO"
         results['method'] = "CBR"
         return results
 
     VBRI = stream.find("0x56425249", bytealigned=True)
     if VBRI:
+        results['xing_header'] = "VBRI"
         results['method'] = "VBR"
         return results
 
