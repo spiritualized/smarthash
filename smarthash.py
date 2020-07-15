@@ -2,6 +2,9 @@ import logging
 import os, sys, importlib, inspect, json, math, re
 from collections import OrderedDict
 
+from mutagen.flac import VCFLACDict
+from mutagen.id3 import ID3
+
 from BitTornado.Application.makemetafile import make_meta_file
 from pymediainfo import MediaInfo
 from termcolor import colored, cprint
@@ -162,6 +165,11 @@ if __name__ == "__main__":
 
                 for tag in sorted(tags):
                     smarthash_info['tags'][tag] = tags[tag]
+
+                if isinstance(mutagen_file.tags, VCFLACDict):
+                    smarthash_info['tag_type'] = 'FLAC'
+                elif isinstance(mutagen_file.tags, ID3):
+                    smarthash_info['tag_type'] = 'ID3'
 
             # Xing frame info
             if mime_type == "audio/mpeg" or ext == ".mp3":
