@@ -170,6 +170,8 @@ if __name__ == "__main__":
                     smarthash_info['tag_type'] = 'FLAC'
                 elif isinstance(mutagen_file.tags, ID3):
                     smarthash_info['tag_type'] = 'ID3'
+                smarthash_info['length'] = mutagen_file.info.length
+                smarthash_info['bitrate'] = mutagen_file.info.bitrate
 
             # Xing frame info
             if mime_type == "audio/mpeg" or ext == ".mp3":
