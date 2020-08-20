@@ -1,4 +1,6 @@
 import math, io, os, sys
+from typing import List
+
 import cv2
 from termcolor import colored, cprint
 import magic
@@ -6,6 +8,15 @@ import bitstring
 import json
 
 from config import blacklist_file_extensions, blacklist_path_matches
+
+
+class ValidationError(Exception):
+    def __init__(self, errors: List[str]):
+        self.errors = errors
+
+class PluginError(Exception):
+    def __init__(self, error: str):
+        self.error = error
 
 def error(msg):
     try:
