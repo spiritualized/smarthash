@@ -1,5 +1,6 @@
 import logging
 import os, sys, importlib, inspect, json, math, re
+import time
 from collections import OrderedDict
 from typing import List
 
@@ -141,6 +142,8 @@ class SmartHash:
 
         except ValidationError as e:
             for error in e.errors:
+                if len(error) > 400:
+                    error = "<error message is too long to display>"
                 cprint("Error: {0}".format(error), 'red')
 
     def process_folder(self, path: str):
@@ -353,6 +356,10 @@ class SmartHash:
             cprint("Done{0}\n".format(" " * 40), 'green', end='\r')
         except PluginError as e:
             cprint(e.error, "red")
+        except ServerError:
+            cprint("Server error, retrying...", "red")
+            time.sleep(1)
+            self.process_folder_wrapper(path)
 
 
 
