@@ -69,7 +69,11 @@ class SmartHash:
                 logging.error("Could not import \"{0}\" plugin".format(x))
                 sys.exit(1)
 
-            new_plugin_src = self.plugins[x].get_update(smarthash_version)
+            try:
+                new_plugin_src = self.plugins[x].get_update(smarthash_version)
+            except requests.exceptions.ConnectionError:
+                cprint("Connection error: plugin could not check for updates", 'red')
+                exit(1)
 
             if new_plugin_src != "":
                 try:
