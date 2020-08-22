@@ -1,7 +1,10 @@
 import math, io, os, sys
+import time
 from typing import List
 
 import cv2
+import requests
+from requests import Response
 from termcolor import colored, cprint
 import magic
 import bitstring
@@ -37,6 +40,17 @@ def error(msg):
         cprint(msg, 'red')
 
     sys.exit(1)
+
+def requests_retriable_post(url: str, **kwargs) -> Response:
+    while True:
+        try:
+            response = requests.post(url, **kwargs)
+            break
+        except requests.exceptions.ConnectionError:
+            cprint("Connection error, retrying...", 'red')
+            time.sleep(1)
+
+    return response
 
 def imgKeyVariance(item):
     return item[1]
