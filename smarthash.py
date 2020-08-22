@@ -180,7 +180,8 @@ class SmartHash:
                     if track_map['track_type'] == "General":
                         track_map['complete_name'] = track_map['complete_name'].replace(parent_dir, "")
                         track_map['folder_name'] = track_map['folder_name'].replace(parent_dir, "")
-                        total_duration += track_map['duration']
+                        if 'duration' in track_map:
+                            total_duration += track_map['duration']
 
                     smarthash_info['mediainfo'].append(track_map)
 
@@ -189,6 +190,9 @@ class SmartHash:
                     smarthash_info['tags'] = OrderedDict()
 
                     mutagen_file = mutagen.File(file_path)  # easy=True
+
+                    if not mutagen_file:
+                        continue
 
                     tags = {}
                     for k in mutagen_file:
