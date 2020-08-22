@@ -10,4 +10,4 @@ bitstring>=3.1.5
 PyInstaller>=3.4
 python-magic-bin>=0.4.14 ; sys_platform == 'win32' or sys_platform == 'darwin'
 pypiwin32>=223 ; sys_platform == 'win32'
-release-dir-scanner>=1.0.0
+release-dir-scanner>=1.0.1
