@@ -18,6 +18,10 @@ class PluginError(Exception):
     def __init__(self, error: str):
         self.error = error
 
+class ServerError(Exception):
+    def __init__(self, error: str):
+        self.error = error
+
 def error(msg):
     try:
         decoded = json.loads(msg)
