@@ -69,29 +69,6 @@ class SmartHash:
                 logging.error("Could not import \"{0}\" plugin".format(x))
                 sys.exit(1)
 
-            try:
-                new_plugin_src = self.plugins[x].get_update(smarthash_version)
-            except requests.exceptions.ConnectionError:
-                cprint("Connection error: plugin could not check for updates", 'red')
-                exit(1)
-
-            if new_plugin_src != "":
-                try:
-                    with open(os.path.join(plugin_path, '__temp__.py'), 'w+') as plugin_file:
-                        plugin_file.write(new_plugin_src)
-                    new_plugin_module = importlib.import_module("Plugins.__temp__").SmarthashPlugin()
-
-                    os.remove(os.path.join(plugin_path, self.plugins[x].get_filename()))
-                    os.rename(os.path.join(plugin_path, new_plugin_module.get_filename()),
-                              os.path.join(plugin_path, self.plugins[x].get_filename()))
-                    print("'{0}' plugin updated from {1} to {2}".format(new_plugin_module.description,
-                                                                        self.plugins[x].plugin_version,
-                                                                        new_plugin_module.plugin_version))
-                    self.plugins[x] = new_plugin_module
-                except:
-                    print("Failed updating to new version of '{0}'".format(self.plugins[x].description))
-                    sys.exit(1)
-
             # store unique argparse argument registrations
             for arg in self.plugins[x].arguments:
                 if arg.argument not in unique_arguments:
@@ -106,14 +83,39 @@ class SmartHash:
         for arg in unique_arguments:
             argparser.add_argument(arg, **unique_arguments[arg])
 
-
-        output_dir = os.getcwd()
-
         self.args = argparser.parse_args()
 
         if self.args.plugin not in self.plugins:
             logging.error("Invalid plugin: {0}".format(self.args.plugin))
             sys.exit(1)
+
+        # update the selected plugin
+        if self.args.plugin:
+            new_plugin_src = None
+            while True:
+                try:
+                    new_plugin_src = self.plugins[self.args.plugin].get_update(smarthash_version)
+                    break
+                except (requests.exceptions.ConnectionError, ServerError):
+                    cprint("Connection error: plugin could not check for updates. retrying...", 'red')
+                    time.sleep(1)
+
+            if new_plugin_src != "":
+                try:
+                    with open(os.path.join(plugin_path, '__temp__.py'), 'w+') as plugin_file:
+                        plugin_file.write(new_plugin_src)
+                    new_plugin_module = importlib.import_module("Plugins.__temp__").SmarthashPlugin()
+
+                    os.remove(os.path.join(plugin_path, self.plugins[self.args.plugin].get_filename()))
+                    os.rename(os.path.join(plugin_path, new_plugin_module.get_filename()),
+                              os.path.join(plugin_path, self.plugins[self.args.plugin].get_filename()))
+                    print("'{0}' plugin updated from {1} to {2}".format(new_plugin_module.description,
+                                                                        self.plugins[self.args.plugin].plugin_version,
+                                                                        new_plugin_module.plugin_version))
+                    self.plugins[self.args.plugin] = new_plugin_module
+                except:
+                    print("Failed updating to new version of '{0}'".format(self.plugins[self.args.plugin].description))
+                    sys.exit(1)
 
         self.plugins[self.args.plugin].validate_settings()
         self.plugins[self.args.plugin].validate_parameters(self.args)
