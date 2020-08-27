@@ -5,7 +5,7 @@ from pluginmixin import PluginMixin
 
 class BasePlugin(PluginMixin):
 
-	handler_version = "1.0.0"
+	plugin_version = "1.0.0"
 	description = ""
 	options = []
 
