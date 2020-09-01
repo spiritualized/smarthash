@@ -91,6 +91,9 @@ class SmartHash:
 
         # update the selected plugin
         if self.args.plugin:
+            self.plugins[self.args.plugin].validate_settings()
+            self.plugins[self.args.plugin].validate_parameters(self.args)
+
             new_plugin_src = None
             while True:
                 try:
@@ -116,9 +119,6 @@ class SmartHash:
                 except:
                     print("Failed updating to new version of '{0}'".format(self.plugins[self.args.plugin].description))
                     sys.exit(1)
-
-        self.plugins[self.args.plugin].validate_settings()
-        self.plugins[self.args.plugin].validate_parameters(self.args)
 
 
     def process(self):
