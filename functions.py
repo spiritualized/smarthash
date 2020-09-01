@@ -186,8 +186,9 @@ def get_mime_type(path):
     try:
         with open(path, 'rb') as infile:
             return magic.from_buffer(infile.read(1048576), mime=True)
-    except:
-        pass
+    except Exception as e:
+        cprint("Metadata error, check your 'magic' installation: {0}".format(str(e)), 'red')
+        exit(1)
     return mime_type
 
 def Mp3Info(path):
