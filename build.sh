@@ -45,7 +45,7 @@ VIRTUAL_ENV_ACTIVE=$($PYTHON_EXEC -c "import sys; print(hasattr(sys, 'real_prefi
 
 if [ $VIRTUAL_ENV_ACTIVE = "False" ]; then
     if [ ! -d "./venv/bin" ]; then
-        python -m "venv" ./venv
+        $PYTHON_EXEC -m "venv" ./venv
     fi
     source "./venv/bin/activate"
     pip install -r requirements.txt
