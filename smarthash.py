@@ -4,6 +4,7 @@ import time
 from collections import OrderedDict
 from typing import List
 
+from libprick import Pricker, PrickError
 from mutagen.flac import VCFLACDict
 from mutagen.id3 import ID3
 from release_dir_scanner import get_release_dirs
@@ -23,7 +24,7 @@ import MIFormat
 from functions import *
 from config import *
 
-smarthash_version = "2.2.0"
+smarthash_version = "2.4.0"
 
 
 class SmartHash:
@@ -305,12 +306,26 @@ class SmartHash:
         metainfo = make_meta_file(path, None, params=params, progress=prog)
         #print()
 
+        pricker = Pricker()
+
         # lookup gathered metadata and insert into the torrent file metainfo
         for file in metainfo['info']['files']:
             file_path = os.path.join(os.path.basename(path), *file['path'])
 
             if file_path in smarthash_path_info:
                 file['smarthash_info'] = json.dumps(smarthash_path_info[file_path])
+
+                # calculate a pricker hash for audio files
+                ext = os.path.splitext(file_path)[1].lower()
+                if smarthash_path_info[file_path]['mime_type'].split('/')[0] in ['audio', 'video'] or \
+                    ext in whitelist_video_extensions or ext in whitelist_audio_extensions:
+                    try:
+                        pricker.open(os.path.join(path, *file['path']))
+                        file['pricker'] = pricker.hexdigest()
+                        metainfo['pricker_version'] = pricker.version()
+                    except PrickError:
+                        pass
+
 
         images_per_video_file = 4
         if num_video_files in [2, 3]:
@@ -326,8 +341,8 @@ class SmartHash:
             file_path = os.path.join(path, *file['path'])
             ext = os.path.splitext(file_path)[1].lower()
             path_key = os.path.join(metainfo['info']['name'], *file['path'])
-            mime_type = smarthash_path_info[path_key]['mime_type'] if path_key in smarthash_path_info else get_mime_type(
-                file_path)
+            mime_type = smarthash_path_info[path_key]['mime_type'] \
+                if path_key in smarthash_path_info else get_mime_type(file_path)
             mime_prefix = mime_type.split("/")[0]
 
             # for video files, compose a standard(ish) MediaInfo text output

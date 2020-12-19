@@ -189,7 +189,7 @@ class Info(TypedDict):   # pylint: disable=R0904
 
                 def valconst(self, x):
                     return VALID_NAME.match(x)
-            typemap = {'length': int, 'path': Path, 'path.utf-8': Path, 'smarthash_info': str}
+            typemap = {'length': int, 'path': Path, 'path.utf-8': Path, 'smarthash_info': str, 'pricker': str}
         valtype = File
     typemap = {'name': str, 'piece length': int, 'pieces': bytes,
                'files': Files, 'length': int, 'private': bool,
@@ -405,9 +405,9 @@ class MetaInfo(TypedDict, BencodedFile):
         splitchar = '|'
 
     typemap = {'info': Info, 'announce': str, 'creation date': int,
-               'comment': str, 'smarthash_version': str, 'announce-list': AnnounceList,
-               'httpseeds': HTTPList, 'created by': str, 'encoding': str,
-               'comment.utf-8': str, 'azureus_properties': dict}
+               'comment': str, 'smarthash_version': str, 'pricker_version': int,
+               'announce-list': AnnounceList, 'httpseeds': HTTPList, 'created by': str,
+               'encoding': str, 'comment.utf-8': str, 'azureus_properties': dict}
     ignore_invalid = True
 
     def __init__(self, *args, **kwargs):
