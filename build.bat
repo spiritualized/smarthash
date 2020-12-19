@@ -4,10 +4,11 @@ if errorlevel 1 goto errorNoPython
 cd /d %~dp0
 python -m venv venv-win
 CALL venv-win/Scripts/activate.bat
+python -m pip install --upgrade pip
 pip install -r requirements.txt
 echo Environment setup complete.
 
-pyinstaller --add-data "Plugins;Plugins" --additional-hooks-dir "hooks" %* smarthash.py
+pyinstaller --noconfirm --add-data "Plugins;Plugins" --additional-hooks-dir "hooks" %* smarthash.py
 
 echo Build complete.
 deactivate
