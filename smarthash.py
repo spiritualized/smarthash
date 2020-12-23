@@ -28,24 +28,15 @@ smarthash_version = "2.4.0"
 
 
 class SmartHash:
+
     def __init__(self):
+        self.early_return = False
         self.init()
 
     def init(self):
         colorama.init()
 
-        # get the root directory
-        root_dir = os.path.dirname(os.path.abspath(__file__))
-        if getattr(sys, 'frozen', False):
-            root_dir = sys._MEIPASS
-
-        # list the plugin directory for external imports
-        plugin_path = os.path.join(root_dir, "Plugins")
-        plugin_filenames = [str(f) for f in os.listdir(plugin_path) if os.path.isfile(os.path.join(plugin_path, f))]
-        plugin_filenames = [ f.split(".")[0] for f in plugin_filenames if f.endswith(".py") ]
-
-        if os.path.exists(os.path.join(plugin_path, '__temp__.py')):
-            os.remove(os.path.join(plugin_path, '__temp__.py'))
+        plugin_filenames = SmartHash.plugin_find()
 
         # basic parameters
         argparser = argparse.ArgumentParser()
@@ -67,8 +58,8 @@ class SmartHash:
             self.plugins[x] = importlib.import_module("Plugins." + x).SmarthashPlugin()
 
             if not hasattr(self.plugins[x], 'handle'):
-                logging.error("Could not import \"{0}\" plugin".format(x))
-                sys.exit(1)
+                self.show_error("Could not import \"{0}\" plugin".format(x))
+                continue
 
             # store unique argparse argument registrations
             for arg in self.plugins[x].arguments:
@@ -92,34 +83,65 @@ class SmartHash:
 
         # update the selected plugin
         if self.args.plugin:
-            self.plugins[self.args.plugin].validate_settings()
-            self.plugins[self.args.plugin].validate_parameters(self.args)
+            self.plugin_update(self.args.plugin)
 
-            new_plugin_src = None
-            while True:
-                try:
-                    new_plugin_src = self.plugins[self.args.plugin].get_update(smarthash_version)
-                    break
-                except (requests.exceptions.ConnectionError, ServerError):
-                    cprint("Connection error: plugin could not check for updates. retrying...", 'red')
-                    time.sleep(1)
+        self.plugins[self.args.plugin].validate_parameters(self.args)
 
-            if new_plugin_src != "":
-                try:
-                    with open(os.path.join(plugin_path, '__temp__.py'), 'w+') as plugin_file:
-                        plugin_file.write(new_plugin_src)
-                    new_plugin_module = importlib.import_module("Plugins.__temp__").SmarthashPlugin()
+    @staticmethod
+    def plugin_find() -> List[str]:
+        plugin_path = SmartHash.get_plugin_path()
+        plugin_filenames = [str(f) for f in os.listdir(plugin_path) if os.path.isfile(os.path.join(plugin_path, f))]
+        plugin_filenames = [ f.split(".")[0] for f in plugin_filenames if f.endswith(".py") ]
 
-                    os.remove(os.path.join(plugin_path, self.plugins[self.args.plugin].get_filename()))
-                    os.rename(os.path.join(plugin_path, new_plugin_module.get_filename()),
-                              os.path.join(plugin_path, self.plugins[self.args.plugin].get_filename()))
-                    print("'{0}' plugin updated from {1} to {2}".format(new_plugin_module.description,
-                                                                        self.plugins[self.args.plugin].plugin_version,
-                                                                        new_plugin_module.plugin_version))
-                    self.plugins[self.args.plugin] = new_plugin_module
-                except:
-                    print("Failed updating to new version of '{0}'".format(self.plugins[self.args.plugin].description))
-                    sys.exit(1)
+        if os.path.exists(os.path.join(plugin_path, '__temp__.py')):
+            os.remove(os.path.join(plugin_path, '__temp__.py'))
+
+        return plugin_filenames
+
+    def plugin_update(self, plugin):
+        self.plugins[plugin].validate_settings()
+
+        new_plugin_src = None
+        while True:
+            try:
+                new_plugin_src = self.plugins[plugin].get_update(smarthash_version)
+                self.clear_error()
+                break
+            except (requests.exceptions.ConnectionError, ServerError):
+                self.show_error("Connection error: plugin could not check for updates. retrying...")
+                if self.early_return:
+                    return
+
+                time.sleep(1)
+
+        if new_plugin_src != "":
+            try:
+                plugin_path = self.get_plugin_path()
+                with open(os.path.join(plugin_path, '__temp__.py'), 'w+') as plugin_file:
+                    plugin_file.write(new_plugin_src)
+                new_plugin_module = importlib.import_module("Plugins.__temp__").SmarthashPlugin()
+
+                os.remove(os.path.join(plugin_path, self.plugins[plugin].get_filename()))
+                os.rename(os.path.join(plugin_path, new_plugin_module.get_filename()),
+                          os.path.join(plugin_path, self.plugins[plugin].get_filename()))
+                cprint("'{0}' plugin updated from {1} to {2}".format(new_plugin_module.description,
+                                                                     self.plugins[plugin].plugin_version,
+                                                                     new_plugin_module.plugin_version))
+                self.plugins[plugin] = new_plugin_module
+            except:
+                cprint("Failed updating to new version of '{0}'".format(self.plugins[plugin].description))
+                sys.exit(1)
+
+
+    @staticmethod
+    def get_plugin_path() -> str:
+        # get the root directory
+        root_dir = os.path.dirname(os.path.abspath(__file__))
+        if getattr(sys, 'frozen', False):
+            root_dir = sys._MEIPASS
+
+        # list the plugin directory for external imports
+        return os.path.join(root_dir, "Plugins")
 
 
     def process(self):
@@ -275,7 +297,7 @@ class SmartHash:
         if imdb_id:
 
             # imdb._logging.setLevel("error")
-            print('IMDb querying...\r', end='\r'),
+            cprint('IMDb querying...\r', end='\r'),
             imdb_site = imdb.IMDb()
 
             imdb_movie = imdb_site.get_movie(imdb_id)
@@ -382,6 +404,19 @@ class SmartHash:
             time.sleep(1)
             self.process_folder_wrapper(path)
 
+
+    def fatal_error(self, msg: str):
+        logging.error(msg)
+        sys.exit(1)
+
+    def show_error(self, msg: str):
+        cprint(msg, 'red')
+
+    def clear_error(self):
+        pass
+
+    def terminate(self):
+        self.early_return = True
 
 
 if __name__ == "__main__":
