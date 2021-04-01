@@ -25,6 +25,10 @@ class ServerError(Exception):
     def __init__(self, error: str):
         self.error = error
 
+class MagicError(Exception):
+    def __init__(self, error: str):
+        self.error = error
+
 def error(msg):
     try:
         decoded = json.loads(msg)
@@ -187,8 +191,7 @@ def get_mime_type(path):
         with open(path, 'rb') as infile:
             return magic.from_buffer(infile.read(1048576), mime=True)
     except Exception as e:
-        cprint("Metadata error, check your 'magic' installation: {0}".format(str(e)), 'red')
-        exit(1)
+        raise MagicError("Metadata error, check your 'magic' installation: {0}".format(str(e)))
     return mime_type
 
 def Mp3Info(path):
