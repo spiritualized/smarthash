@@ -5,6 +5,8 @@ from termcolor import cprint
 from baseplugin import BasePlugin
 import os
 
+from functions import PluginError
+
 
 class SmarthashPlugin(BasePlugin):
 
@@ -30,8 +32,7 @@ class SmarthashPlugin(BasePlugin):
 
 			# check if the output path exists
 			if not os.path.isdir(os.path.dirname(save_path)):
-				cprint("Output path {0} does not exist".format(os.path.dirname(save_path)), "red")
-				sys.exit(1)
+				raise PluginError("Output path {0} does not exist".format(os.path.dirname(save_path)))
 
 		with open(save_path, 'wb') as handle:
 			handle.write(data['torrent_file'])

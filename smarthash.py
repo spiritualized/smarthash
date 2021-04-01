@@ -58,7 +58,7 @@ class SmartHash:
             self.plugins[x] = importlib.import_module("Plugins." + x).SmarthashPlugin()
 
             if not hasattr(self.plugins[x], 'handle'):
-                self.show_error("Could not import \"{0}\" plugin".format(x))
+                self.init_error("Could not import \"{0}\" plugin".format(x))
                 continue
 
             # store unique argparse argument registrations
@@ -108,7 +108,7 @@ class SmartHash:
                 self.clear_error()
                 break
             except (requests.exceptions.ConnectionError, ServerError):
-                self.show_error("Connection error: plugin could not check for updates. retrying...")
+                self.init_error("Connection error: plugin could not check for updates. retrying...")
                 if self.early_return:
                     return
 
@@ -167,7 +167,8 @@ class SmartHash:
 
     def process_folder_wrapper(self, path: str):
         try:
-            self.process_folder(path)
+            self.process_folder(path, self.args.plugin, self.args.nfo_path)
+            cprint("Done{0}\n".format(" " * 40), 'green', end='\r')
 
         except ValidationError as e:
             for error in e.errors:
@@ -175,7 +176,15 @@ class SmartHash:
                     error = "<error message is too long to display>"
                 cprint("Error: {0}".format(error), 'red')
 
-    def process_folder(self, path: str):
+        except (MagicError, PluginError) as e:
+            cprint(e.error, 'red')
+
+        except ServerError:
+            cprint("Server error, retrying...", "red")
+            time.sleep(1)
+            self.process_folder_wrapper(path)
+
+    def process_folder(self, path: str, plugin: str, nfo_path: str=None):
 
         logging.info("----------------------------\n{0}".format(path))
         print("\n{0}".format(path))
@@ -264,16 +273,16 @@ class SmartHash:
             nfos.append(read_nfo(os.path.join(path, f)))
 
         # manual nfo path
-        if self.args.nfo_path:
-            if os.path.isfile(self.args.nfo_path) and self.args.nfo_path.lower().endswith(".nfo"):
-                nfos.append(read_nfo(self.args.nfo_path))
-            elif os.path.isdir(self.args.nfo_path):
-                nfo_filenames = [f for f in os.listdir(self.args.nfo_path)
-                                 if os.path.isfile(os.path.join(self.args.nfo_path, f))]
+        if nfo_path:
+            if os.path.isfile(nfo_path) and nfo_path.lower().endswith(".nfo"):
+                nfos.append(read_nfo(nfo_path))
+            elif os.path.isdir(nfo_path):
+                nfo_filenames = [f for f in os.listdir(nfo_path)
+                                 if os.path.isfile(os.path.join(nfo_path, f))]
 
                 nfo_filenames = [f for f in nfo_filenames if f.lower().endswith(".nfo")]
                 for f in nfo_filenames:
-                    nfos.append(read_nfo(os.path.join(self.args.nfo_path, f)))
+                    nfos.append(read_nfo(os.path.join(nfo_path, f)))
 
         imdb_id = None
         genre = None
@@ -289,7 +298,7 @@ class SmartHash:
         if len(nfos) > 0 and not imdb_id:
             nfo = nfos[0]
 
-        if 'imdb-id' in self.plugins[self.args.plugin].options and self.args.imdb_id:
+        if 'imdb-id' in self.plugins[plugin].options and self.args.imdb_id:
             # manual imdb_id override
             imdb_id = self.args.imdb_id
 
@@ -315,7 +324,7 @@ class SmartHash:
             'smarthash_version': smarthash_version,
         }
 
-        self.plugins[self.args.plugin].early_validation(path, {
+        self.plugins[plugin].early_validation(path, {
             'args': self.args,
             'smarthash_info': smarthash_path_info,
             'title': os.path.basename(path),
@@ -374,7 +383,7 @@ class SmartHash:
                 formatted_mediainfo += MIFormat.MItostring(
                     smarthash_path_info[os.path.join(os.path.basename(path), *file['path'])]['mediainfo'])
 
-                if "video-screenshots" in self.plugins[self.args.plugin].options:
+                if "video-screenshots" in self.plugins[plugin].options:
                     extracted_images.append(extractImages(file_path, images_per_video_file))
 
         # collect the dataset for the plugin
@@ -394,22 +403,15 @@ class SmartHash:
         if genre:
             data['genre'] = genre
 
-        try:
-            self.plugins[self.args.plugin].handle(data)
-            cprint("Done{0}\n".format(" " * 40), 'green', end='\r')
-        except PluginError as e:
-            cprint(e.error, "red")
-        except ServerError:
-            cprint("Server error, retrying...", "red")
-            time.sleep(1)
-            self.process_folder_wrapper(path)
+        self.plugins[plugin].handle(data)
+
 
 
     def fatal_error(self, msg: str):
         logging.error(msg)
         sys.exit(1)
 
-    def show_error(self, msg: str):
+    def init_error(self, msg: str):
         cprint(msg, 'red')
 
     def clear_error(self):

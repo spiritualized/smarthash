@@ -8,6 +8,7 @@ opencv-python-headless>=3.4.0.12
 pymediainfo>=2.2.1
 PyInstaller>=3.4
 pypiwin32>=223 ; sys_platform == 'win32'
+PySimpleGUI==4.32.1
 python-magic>=0.4.15
 python-magic-bin>=0.4.14 ; sys_platform == 'win32' or sys_platform == 'darwin'
 requests>=2.18.4
