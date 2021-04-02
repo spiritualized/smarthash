@@ -1,13 +1,20 @@
 import os, sys
 
+from functions import PluginError
 from pluginmixin import PluginMixin
 
 
 class BasePlugin(PluginMixin):
 
 	plugin_version = "1.0.0"
+	title = None
 	description = ""
 	options = []
+
+	def get_title(self):
+		if not self.title:
+			raise PluginError('Plugin does not have a title')
+		return "{title} v{version}".format(title=self.title, version=self.plugin_version)
 
 	def get_filename(self):
 		return os.path.basename(sys.modules[self.__module__].__file__)
