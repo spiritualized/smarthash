@@ -3,7 +3,7 @@ import os
 
 
 class SmarthashPlugin(BasePlugin):
-
+	title = "Save torrent and metadata"
 	description = "Writes extracted data out to a folder"
 	options = ['video-screenshots']
 

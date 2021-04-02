@@ -23,6 +23,7 @@ import requests, configparser, baseplugin, bitstring
 import MIFormat
 from functions import *
 from config import *
+from plugin.baseplugin import BasePlugin
 
 smarthash_version = "2.4.0"
 
@@ -83,7 +84,7 @@ class SmartHash:
 
         # update the selected plugin
         if self.args.plugin:
-            self.plugin_update(self.args.plugin)
+            self.plugin_update(self.plugins[self.args.plugin])
 
         self.plugins[self.args.plugin].validate_parameters(self.args)
 
@@ -98,13 +99,13 @@ class SmartHash:
 
         return plugin_filenames
 
-    def plugin_update(self, plugin):
-        self.plugins[plugin].validate_settings()
+    def plugin_update(self, plugin: BasePlugin):
+        plugin.validate_settings()
 
         new_plugin_src = None
         while True:
             try:
-                new_plugin_src = self.plugins[plugin].get_update(smarthash_version)
+                new_plugin_src = plugin.get_update(smarthash_version)
                 self.clear_error()
                 break
             except (requests.exceptions.ConnectionError, ServerError):
@@ -121,15 +122,15 @@ class SmartHash:
                     plugin_file.write(new_plugin_src)
                 new_plugin_module = importlib.import_module("Plugins.__temp__").SmarthashPlugin()
 
-                os.remove(os.path.join(plugin_path, self.plugins[plugin].get_filename()))
+                os.remove(os.path.join(plugin_path, plugin.get_filename()))
                 os.rename(os.path.join(plugin_path, new_plugin_module.get_filename()),
-                          os.path.join(plugin_path, self.plugins[plugin].get_filename()))
+                          os.path.join(plugin_path, plugin.get_filename()))
                 cprint("'{0}' plugin updated from {1} to {2}".format(new_plugin_module.description,
-                                                                     self.plugins[plugin].plugin_version,
+                                                                     plugin.plugin_version,
                                                                      new_plugin_module.plugin_version))
-                self.plugins[plugin] = new_plugin_module
+                self.plugins[plugin.get_filename()] = new_plugin_module
             except:
-                cprint("Failed updating to new version of '{0}'".format(self.plugins[plugin].description))
+                cprint("Failed updating to new version of '{0}'".format(plugin.description))
                 sys.exit(1)
 
 
