@@ -339,7 +339,7 @@ class SmartHash:
         })
 
         # hash the folder
-        metainfo = make_meta_file(path, None, params=params, progress=prog)
+        metainfo = make_meta_file(path, None, params=params, progress=self.hash_progress_callback)
         #print()
 
         pricker = Pricker()
@@ -410,6 +410,8 @@ class SmartHash:
 
         plugin.handle(data)
 
+    def hash_progress_callback(self, amount):
+        print('Hashing: %.1f%% complete\r' % (amount * 100), end='\r')
 
 
     def fatal_error(self, msg: str):

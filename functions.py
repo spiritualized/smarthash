@@ -185,11 +185,6 @@ def listFilesInner(parent, path, file_list):
         elif curr.is_dir():
             listFilesInner(parent, curr.path, file_list)
 
-
-def prog(amount):
-    print('Hashing: %.1f%% complete\r' % (amount * 100), end='\r')
-
-
 def get_mime_type(path):
     mime_type = ''
     try:
