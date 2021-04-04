@@ -172,7 +172,7 @@ class SmartHash:
 
     def process_folder_wrapper(self, path: str):
         try:
-            self.process_folder(path, self.args.plugin, self.args.nfo_path)
+            self.process_folder(path, self.plugins[self.args.plugin], self.args.nfo_path)
             cprint("Done{0}\n".format(" " * 40), 'green', end='\r')
 
         except ValidationError as e:
@@ -189,7 +189,7 @@ class SmartHash:
             time.sleep(1)
             self.process_folder_wrapper(path)
 
-    def process_folder(self, path: str, plugin: str, nfo_path: str=None):
+    def process_folder(self, path: str, plugin: BasePlugin, nfo_path: str=None):
 
         logging.info("----------------------------\n{0}".format(path))
         print("\n{0}".format(path))
@@ -303,7 +303,7 @@ class SmartHash:
         if len(nfos) > 0 and not imdb_id:
             nfo = nfos[0]
 
-        if 'imdb-id' in self.plugins[plugin].options and self.args.imdb_id:
+        if 'imdb-id' in plugin.options and self.args.imdb_id:
             # manual imdb_id override
             imdb_id = self.args.imdb_id
 
@@ -329,7 +329,7 @@ class SmartHash:
             'smarthash_version': smarthash_version,
         }
 
-        self.plugins[plugin].early_validation(path, {
+        plugin.early_validation(path, {
             'args': self.args,
             'smarthash_info': smarthash_path_info,
             'title': os.path.basename(path),
@@ -388,7 +388,7 @@ class SmartHash:
                 formatted_mediainfo += MIFormat.MItostring(
                     smarthash_path_info[os.path.join(os.path.basename(path), *file['path'])]['mediainfo'])
 
-                if "video-screenshots" in self.plugins[plugin].options:
+                if "video-screenshots" in plugin.options:
                     extracted_images.append(extractImages(file_path, images_per_video_file))
 
         # collect the dataset for the plugin
@@ -408,7 +408,7 @@ class SmartHash:
         if genre:
             data['genre'] = genre
 
-        self.plugins[plugin].handle(data)
+        plugin.handle(data)
 
 
 

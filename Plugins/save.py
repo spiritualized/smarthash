@@ -1,13 +1,18 @@
-from baseplugin import BasePlugin
+from baseplugin import BasePlugin, Param, ParamType
 import os
 
 
 class SmarthashPlugin(BasePlugin):
+
+	plugin_version = "2.0.0"
 	title = "Save torrent and metadata"
 	description = "Writes extracted data out to a folder"
 	options = ['video-screenshots']
+	parameters = [
+		Param('destination', ParamType.PATH, 'Select a destination folder')
+	]
 
-	def handle(self, data):
+	def handle(self, data) -> None:
 
 		meta_folder = data['path']+"_smarthash"
 		if os.path.isfile(meta_folder):
@@ -23,7 +28,6 @@ class SmarthashPlugin(BasePlugin):
 			with open(os.path.join(data['path']+"_smarthash", "mediainfo.txt"), "w") as file:
 				file.write(data['mediainfo'])
 
-
 		if 'extracted_images' in data:
 			for file_images in data['extracted_images']:
 				i = 0
@@ -31,8 +35,6 @@ class SmarthashPlugin(BasePlugin):
 					with open(os.path.join(data['path']+"_smarthash", "screenshot_{0}.jpeg".format(i)), "wb") as file:
 						file.write(image)
 					i += 1
-
-
 
 		with open(torrent_file_path, 'wb') as handle:
 			handle.write(data['torrent_file'])
