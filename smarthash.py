@@ -50,7 +50,6 @@ class SmartHash:
 
         bulk = argparser.add_mutually_exclusive_group()
         bulk.add_argument("--bulk", action='store_true', help="process every item in the path individually")
-        bulk.add_argument("--bulk-music", action='store_true', help="scan for music releases and process individually")
 
         self.plugins = {}
         unique_arguments = {}
@@ -154,14 +153,19 @@ class SmartHash:
             sys.exit(1)
 
         if self.args.bulk:
-            for item in os.scandir(path):
-                curr = os.path.join(path, item)
-                if os.path.isdir(curr):
-                    self.process_folder_wrapper(curr)
+            bulk_mode = self.plugins[self.args.plugin].get_bulk_mode(self.args)
+            if bulk_mode == BulkMode.STANDARD:
+                for item in os.scandir(path):
+                    curr = os.path.join(path, item)
+                    if os.path.isdir(curr):
+                        self.process_folder_wrapper(curr)
 
-        elif self.args.bulk_music:
-            for release_dir in get_release_dirs(path):
-                self.process_folder_wrapper(release_dir)
+            elif bulk_mode == BulkMode.MUSIC:
+                for release_dir in get_release_dirs(path):
+                    self.process_folder_wrapper(release_dir)
+
+            else:
+                raise PluginError('Selected plugin does not handle bulk mode correctly')
 
         else:
             self.process_folder_wrapper(path)
