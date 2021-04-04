@@ -1,5 +1,6 @@
 import math, io, os, sys
 import time
+from enum import Enum
 from typing import List
 
 import cv2
@@ -28,6 +29,10 @@ class ServerError(Exception):
 class MagicError(Exception):
     def __init__(self, error: str):
         self.error = error
+
+class BulkMode(Enum):
+    STANDARD = 1
+    MUSIC = 2
 
 def error(msg):
     try:

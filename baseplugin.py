@@ -1,6 +1,6 @@
 import os, sys
 
-from functions import PluginError
+from functions import PluginError, BulkMode
 from pluginmixin import PluginMixin
 
 
@@ -18,6 +18,9 @@ class BasePlugin(PluginMixin):
 
 	def get_filename(self):
 		return os.path.basename(sys.modules[self.__module__].__file__)
+
+	def get_bulk_mode(self, args) -> BulkMode:
+		return BulkMode.STANDARD
 
 	def validate_settings(self):
 		pass
