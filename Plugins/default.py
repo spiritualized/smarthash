@@ -1,22 +1,24 @@
-import sys
-
-from termcolor import cprint
-
-from baseplugin import BasePlugin
 import os
+
+from baseplugin import BasePlugin, Param, ParamType
 
 from functions import PluginError
 
 
 class SmarthashPlugin(BasePlugin):
+
+	plugin_version = "2.0.0"
 	title = "Save to file"
 	description = "Save a torrent file only"
+	parameters = [
+		Param('destination', ParamType.PATH, 'Select a destination folder')
+	]
 
-	def early_validation(self, path, data):
+	def early_validation(self, path, data) -> None:
 		if data['args'].destination:
 			self.manual_destination(data['args'].destination, data['title'])
 
-	def handle(self, data):
+	def handle(self, data) -> None:
 
 		save_path = data['path'] + ".torrent"
 
@@ -31,7 +33,7 @@ class SmarthashPlugin(BasePlugin):
 		save_path = destination
 
 		# if the output path ends with a path separator
-		if save_path.endswith(os.sep):
+		if save_path.endswith(os.sep) or save_path.endswith('/'):
 			save_path += title
 
 		# add a .torrent extension if it's missing

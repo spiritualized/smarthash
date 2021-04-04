@@ -1,38 +1,52 @@
 import os, sys
+from enum import Enum
 
 from functions import PluginError, BulkMode
 from pluginmixin import PluginMixin
 
 
+class ParamType(Enum):
+	PATH = 1
+
+
+class Param:
+	def __init__(self, name: str, param_type: ParamType, label: str = None) -> None:
+		self.name = name
+		self.label = label
+		self.param_type = param_type
+
+
 class BasePlugin(PluginMixin):
 
-	plugin_version = "2.0.0"
+	plugin_version = None
 	title = None
 	description = ""
 	options = []
+	parameters = {}
 
-	def get_title(self):
+	def get_title(self) -> str:
 		if not self.title:
 			raise PluginError('Plugin does not have a title')
-		return "{title} v{version}".format(title=self.title, version=self.plugin_version)
+		version = " v{0}".format(self.plugin_version) if self.plugin_version else " [unversioned]"
+		return "{title}{version}".format(title=self.title, version=version)
 
-	def get_filename(self):
+	def get_filename(self) -> str:
 		return os.path.basename(sys.modules[self.__module__].__file__)
 
 	def get_bulk_mode(self, args) -> BulkMode:
 		return BulkMode.STANDARD
 
-	def validate_settings(self):
+	def validate_settings(self) -> None:
 		pass
 
-	def get_update(self, smarthash_version):
+	def get_update(self, smarthash_version) -> str:
 		return ""
 
-	def validate_parameters(self, args):
+	def validate_parameters(self, args) -> None:
 		pass
 
-	def early_validation(self, path, data):
+	def early_validation(self, path, data) -> None:
 		pass
 
-	def handle(self, data):
+	def handle(self, data) -> None:
 		pass
