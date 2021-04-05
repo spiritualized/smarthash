@@ -11,7 +11,7 @@ class SmarthashPlugin(BasePlugin):
 	description = "Writes extracted data out to a folder"
 	options = ['video-screenshots']
 	parameters = [
-		Param('destination', ParamType.PATH, 'Select a destination folder')
+		Param('destination', ParamType.PATH, 'Save to: ', 'Select a destination folder')
 	]
 
 	def handle(self, data) -> None:

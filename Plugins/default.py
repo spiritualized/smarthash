@@ -11,7 +11,7 @@ class SmarthashPlugin(BasePlugin):
 	title = "Save to file"
 	description = "Save a torrent file only"
 	parameters = [
-		Param('destination', ParamType.PATH, 'Select a destination folder')
+		Param('destination', ParamType.PATH, 'Save to: ', 'Select a destination folder')
 	]
 
 	def early_validation(self, path, data) -> None:

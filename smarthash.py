@@ -35,6 +35,7 @@ class SmartHash:
         self.init()
 
     def init(self):
+        self.load_config()
         colorama.init()
 
         plugin_filenames = SmartHash.plugin_find()
@@ -61,6 +62,9 @@ class SmartHash:
                 self.init_error("Could not import \"{0}\" plugin".format(x))
                 continue
 
+            if self.plugins[x].title not in self.config:
+                self.config[self.plugins[x].title] = {}
+
             # store unique argparse argument registrations
             for arg in self.plugins[x].arguments:
                 if arg.argument not in unique_arguments:
@@ -86,6 +90,14 @@ class SmartHash:
             self.plugin_update(self.plugins[self.args.plugin])
 
         self.plugins[self.args.plugin].validate_parameters(self.args)
+
+    def load_config(self) -> None:
+        self.config = configparser.ConfigParser()
+        self.config.read(os.path.join(os.path.dirname(os.path.abspath(__file__)), config_filename))
+
+    def save_config(self) -> None:
+        with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), config_filename), 'w') as configfile:
+            self.config.write(configfile)
 
     @staticmethod
     def plugin_find() -> List[str]:
@@ -190,7 +202,6 @@ class SmartHash:
             self.process_folder_wrapper(path)
 
     def process_folder(self, path: str, plugin: BasePlugin, nfo_path: str=None):
-
 
         logging.info("----------------------------\n{0}".format(path))
         print("\n{0}".format(path))
@@ -362,7 +373,6 @@ class SmartHash:
                         pricker.open(os.path.join(path, *file['path']))
                         file['pricker'] = pricker.hexdigest()
                         metainfo['pricker_version'] = pricker.version()
-                        pricker.reset()
                     except PrickError:
                         pass
 
@@ -410,6 +420,9 @@ class SmartHash:
             data['genre'] = genre
 
         plugin.handle(data)
+
+        # if an operation succeeded, write out the config
+        self.save_config()
 
     def extractImages(self, image_paths: List[str]) -> List:
         count = 0
