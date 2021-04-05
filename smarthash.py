@@ -191,6 +191,7 @@ class SmartHash:
 
     def process_folder(self, path: str, plugin: BasePlugin, nfo_path: str=None):
 
+
         logging.info("----------------------------\n{0}".format(path))
         print("\n{0}".format(path))
 
@@ -200,6 +201,7 @@ class SmartHash:
         total_duration = 0
         smarthash_path_info = {}
         num_video_files = 0
+        self.total_media_size = 0
 
         # extract metadata into a path -> json-metadata map
         for file in file_list:
@@ -213,6 +215,7 @@ class SmartHash:
             mime_prefix = mime_type.split("/")[0]
 
             if mime_prefix in ["audio", "video"] or ext in whitelist_video_extensions or ext in whitelist_audio_extensions:
+                self.total_media_size += os.path.getsize(file_path)
                 smarthash_info = OrderedDict()
                 smarthash_info['mediainfo'] = []
                 if mime_type:
@@ -342,7 +345,7 @@ class SmartHash:
         metainfo = make_meta_file(path, None, params=params, progress=self.hash_progress_callback)
         #print()
 
-        pricker = Pricker()
+        pricker = Pricker(self.pricker_progress_callback)
 
         # lookup gathered metadata and insert into the torrent file metainfo
         for file in metainfo['info']['files']:
@@ -359,18 +362,14 @@ class SmartHash:
                         pricker.open(os.path.join(path, *file['path']))
                         file['pricker'] = pricker.hexdigest()
                         metainfo['pricker_version'] = pricker.version()
+                        pricker.reset()
                     except PrickError:
                         pass
 
-
-        images_per_video_file = 4
-        if num_video_files in [2, 3]:
-            images_per_video_file = 2
-        elif num_video_files > 3:
-            images_per_video_file = 1
-
         formatted_mediainfo = ""
         extracted_images = []
+
+        screenshot_files = []
 
         # extract MediaInfo
         for file in metainfo['info']['files']:
@@ -388,8 +387,10 @@ class SmartHash:
                 formatted_mediainfo += MIFormat.MItostring(
                     smarthash_path_info[os.path.join(os.path.basename(path), *file['path'])]['mediainfo'])
 
-                if "video-screenshots" in plugin.options:
-                    extracted_images.append(extractImages(file_path, images_per_video_file))
+                screenshot_files.append(file_path)
+
+        if "video-screenshots" in plugin.options:
+            extracted_images = self.extractImages(screenshot_files)
 
         # collect the dataset for the plugin
         data = {'smarthash_version': smarthash_version,
@@ -410,21 +411,75 @@ class SmartHash:
 
         plugin.handle(data)
 
-    def hash_progress_callback(self, amount):
+    def extractImages(self, image_paths: List[str]) -> List:
+        count = 0
+
+        images_per_video_file = 4
+        if len(image_paths) in [2, 3]:
+            images_per_video_file = 2
+        elif len(image_paths) > 3:
+            images_per_video_file = 1
+
+        n2 = images_per_video_file * 2 + 10
+        if n2 < 10:
+            n2 = 10
+
+        images = []
+
+        for path in image_paths:
+            vidcap = cv2.VideoCapture(path)
+
+            # take frames at regular intervals from a range excluding the first and last 10% of the file
+            frame_count = vidcap.get(cv2.CAP_PROP_FRAME_COUNT)
+            frame_count_10 = math.floor(frame_count / 10)
+            interval = math.floor((frame_count - frame_count_10 * 2) / (n2 + 1))
+
+            tmp_images = []
+            tmp_variances = []
+
+            for i in range(0, n2):
+                vidcap.set(cv2.CAP_PROP_POS_FRAMES, (frame_count_10 + i * interval))  # added this line
+                success, image = vidcap.read()
+                success, buf = cv2.imencode(".jpeg", image)
+
+                variance = cv2.Laplacian(image, cv2.CV_64F).var()
+                tmp_images.append(buf.tobytes())
+                tmp_variances.append([i, variance])
+
+
+                count += 1
+                self.image_extaction_progress_callback(count, images_per_video_file*len(image_paths))
+
+            # select the N candidates with the highest variance, preserving order
+            tmp_variances = sorted(tmp_variances, key=imgKeyVariance, reverse=True)[0:images_per_video_file]
+            tmp_variances = sorted(tmp_variances, key=imgKeyOrder)
+
+            images.append([tmp_images[x[0]] for x in tmp_variances])
+
+        return images
+
+    def hash_progress_callback(self, amount) -> None:
         print('Hashing: %.1f%% complete\r' % (amount * 100), end='\r')
 
 
-    def fatal_error(self, msg: str):
+    def pricker_progress_callback(self, bytes) -> None:
+        print('Hashing again: %.1f%% complete\r' % (bytes / self.total_media_size * 100), end='\r')
+
+    def image_extaction_progress_callback(self, x: int, total_images: int) -> None:
+        print('Extracting images: %.1f%% complete\r' % (x / total_images * 100), end='\r')
+
+
+    def fatal_error(self, msg: str) -> None:
         logging.error(msg)
         sys.exit(1)
 
-    def init_error(self, msg: str):
+    def init_error(self, msg: str) -> None:
         cprint(msg, 'red')
 
-    def clear_error(self):
+    def clear_error(self) -> None:
         pass
 
-    def terminate(self):
+    def terminate(self) -> None:
         self.early_return = True
 
 
