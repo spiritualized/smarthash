@@ -4,3 +4,5 @@ blacklist_path_matches = ["proof", "sample"] # ignore subfolders and filenames c
 blacklist_media_extensions = [".sub"] # do not extract metainfo from these file extensions
 whitelist_video_extensions = [".mkv", ".avi", ".mp4"] # always extract metainfo from these file extensions
 whitelist_audio_extensions = [".mp3", ".flac"] # always extract metainfo from these file extensions
+
+config_filename = "smarthash.ini"

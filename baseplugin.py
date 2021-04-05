@@ -10,11 +10,13 @@ class ParamType(Enum):
 
 
 class Param:
-	def __init__(self, name: str, param_type: ParamType, label: str = None, required: bool = True) -> None:
+	def __init__(self, name: str, param_type: ParamType, label: str = None, default_value = None,
+				 required: bool = True) -> None:
 		self.name = name
-		self.label = label
-		self.required = required
 		self.param_type = param_type
+		self.label = label
+		self.default_value = default_value
+		self.required = required
 
 
 class BasePlugin(PluginMixin):
