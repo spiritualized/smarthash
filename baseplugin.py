@@ -1,5 +1,6 @@
 import os, sys
 from enum import Enum
+from typing import List, Dict, Optional
 
 from functions import PluginError, BulkMode
 from pluginmixin import PluginMixin
@@ -7,16 +8,19 @@ from pluginmixin import PluginMixin
 
 class ParamType(Enum):
 	PATH = 1
+	SELECT = 2
+	TEXT = 3
 
 
 class Param:
 	def __init__(self, name: str, param_type: ParamType, label: str = None, default_value = None,
-				 required: bool = True) -> None:
+				 required: bool = True, options: List[str] = None) -> None:
 		self.name = name
 		self.param_type = param_type
 		self.label = label
 		self.default_value = default_value
 		self.required = required
+		self.options = options
 
 
 class BasePlugin(PluginMixin):
@@ -24,8 +28,6 @@ class BasePlugin(PluginMixin):
 	plugin_version = None
 	title = None
 	description = ""
-	options = []
-	parameters = {}
 
 	def get_title(self) -> str:
 		if not self.title:
@@ -33,8 +35,10 @@ class BasePlugin(PluginMixin):
 		version = " v{0}".format(self.plugin_version) if self.plugin_version else " [unversioned]"
 		return "{title}{version}".format(title=self.title, version=version)
 
-	def get_filename(self) -> str:
-		return os.path.basename(sys.modules[self.__module__].__file__)
+	def get_param(self, name: str) -> Optional[Param]:
+		for param in self.parameters:
+			if param.name == name:
+				return param
 
 	def get_bulk_mode(self, args) -> BulkMode:
 		return BulkMode.STANDARD
