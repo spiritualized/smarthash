@@ -2,7 +2,7 @@ import logging
 import os, sys, importlib, inspect, json, math, re
 import time
 from collections import OrderedDict
-from typing import List
+from typing import List, Dict
 
 from libprick import Pricker, PrickError
 from mutagen.flac import VCFLACDict
@@ -23,7 +23,7 @@ import requests, configparser, baseplugin, bitstring
 import MIFormat
 from functions import *
 from config import *
-from plugin.baseplugin import BasePlugin
+from baseplugin import BasePlugin
 
 smarthash_version = "2.4.0"
 
@@ -57,6 +57,7 @@ class SmartHash:
 
         for x in plugin_filenames:
             self.plugins[x] = importlib.import_module("Plugins." + x).SmarthashPlugin()
+            self.plugins[x].set_config(self.config[self.plugins[x].title])
 
             if not hasattr(self.plugins[x], 'handle'):
                 self.init_error("Could not import \"{0}\" plugin".format(x))
