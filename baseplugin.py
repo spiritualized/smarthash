@@ -11,6 +11,10 @@ class ParamType(Enum):
 	SELECT = 2
 	TEXT = 3
 
+class HookCommandType(Enum):
+	UPDATE = 1
+	VISIBLE = 2
+
 
 class Param:
 	def __init__(self, name: str, param_type: ParamType, label: str = None, default_value = None,
@@ -22,6 +26,20 @@ class Param:
 		self.required = required
 		self.options = options
 		self.visible = visible
+
+
+class Hook:
+	def __init__(self, element_name: str, function, exec_on_init=False):
+		self.element_name = element_name
+		self.function = function
+		self.exec_on_init = exec_on_init
+
+
+class HookCommand:
+	def __init__(self, command_type: HookCommandType, element_name: str, value):
+		self.command_type = command_type
+		self.element_name = element_name
+		self.value = value
 
 
 class BasePlugin(PluginMixin):
