@@ -47,7 +47,6 @@ class SmartHash:
         argparser.add_argument("--plugin", help="specify a manual output script: " + ", ".join(plugin_filenames),
                                default="default")
         argparser.add_argument("--destination", help="specify a file destination")
-        argparser.add_argument("--nfo-path", help="specify a nfo file/folder path manually")
 
         bulk = argparser.add_mutually_exclusive_group()
         bulk.add_argument("--bulk", action='store_true', help="process every item in the path individually")
@@ -185,7 +184,7 @@ class SmartHash:
 
     def process_folder_wrapper(self, path: str):
         try:
-            self.process_folder(path, self.plugins[self.args.plugin], self.args.nfo_path)
+            self.process_folder(path, self.plugins[self.args.plugin])
             cprint("Done{0}\n".format(" " * 40), 'green', end='\r')
 
         except ValidationError as e:
@@ -202,7 +201,7 @@ class SmartHash:
             time.sleep(1)
             self.process_folder_wrapper(path)
 
-    def process_folder(self, path: str, plugin: BasePlugin, nfo_path: str=None):
+    def process_folder(self, path: str, plugin: BasePlugin):
 
         logging.info("----------------------------\n{0}".format(path))
         print("\n{0}".format(path))
@@ -284,59 +283,6 @@ class SmartHash:
 
                 smarthash_path_info[file] = smarthash_info
 
-        # read nfos from main path
-        nfo_filenames = [f for f in os.listdir(path) if os.path.isfile(os.path.join(path, f))]
-        nfo_filenames = [f for f in nfo_filenames if f.lower().endswith(".nfo")]
-
-        nfos = []
-        for f in nfo_filenames:
-            nfos.append(read_nfo(os.path.join(path, f)))
-
-        # manual nfo path
-        if nfo_path:
-            if os.path.isfile(nfo_path) and nfo_path.lower().endswith(".nfo"):
-                nfos.append(read_nfo(nfo_path))
-            elif os.path.isdir(nfo_path):
-                nfo_filenames = [f for f in os.listdir(nfo_path)
-                                 if os.path.isfile(os.path.join(nfo_path, f))]
-
-                nfo_filenames = [f for f in nfo_filenames if f.lower().endswith(".nfo")]
-                for f in nfo_filenames:
-                    nfos.append(read_nfo(os.path.join(nfo_path, f)))
-
-        imdb_id = None
-        genre = None
-        nfo = ''
-
-        for curr_nfo in nfos:
-            imdb_id_match = re.findall(r"imdb\.com/title/tt(\d{7}\d?)", curr_nfo)
-            if imdb_id_match:
-                imdb_id = imdb_id_match[0]
-                nfo = curr_nfo
-
-        # default nfo
-        if len(nfos) > 0 and not imdb_id:
-            nfo = nfos[0]
-
-        if 'imdb-id' in plugin.options and self.args.imdb_id:
-            # manual imdb_id override
-            imdb_id = self.args.imdb_id
-
-        # make sure the IMDb ID exists
-        if imdb_id:
-
-            # imdb._logging.setLevel("error")
-            cprint('IMDb querying...\r', end='\r'),
-            imdb_site = imdb.IMDb()
-
-            imdb_movie = imdb_site.get_movie(imdb_id)
-            if not imdb_movie:
-                cprint("Invalid IMDb ID: {0}".format(imdb_id), "red")
-                sys.exit(1)
-            logging.info("IMDb verified: \"{0}\"".format(imdb_movie))
-
-            genre = choose_genre(imdb_movie['genres'])
-
         params = {
             'blacklist_file_extensions': [x.lower() for x in blacklist_file_extensions],
             'blacklist_path_matches': [x.lower() for x in blacklist_path_matches],
@@ -348,8 +294,7 @@ class SmartHash:
             'args': self.args,
             'smarthash_info': smarthash_path_info,
             'title': os.path.basename(path),
-            'imdb_id': imdb_id,
-            'genre': genre,
+        #    'genre': genre,
             'params': params
         })
 
@@ -404,21 +349,18 @@ class SmartHash:
             extracted_images = self.extractImages(screenshot_files)
 
         # collect the dataset for the plugin
-        data = {'smarthash_version': smarthash_version,
-                'args': self.args,
-                'path': path,
-                'title': os.path.split(path)[-1],
-                'total_duration': total_duration,
-                'mediainfo': formatted_mediainfo,
-                'extracted_images': extracted_images,
-                'torrent_file': metainfo.gettorrent(),
-                'nfo': nfo,
-                }
-
-        if imdb_id:
-            data['imdb_id'] = imdb_id
-        if genre:
-            data['genre'] = genre
+        data = {
+            'smarthash_version': smarthash_version,
+            'args': self.args,
+            'path': path,
+            'title': os.path.split(path)[-1],
+            'total_duration': total_duration,
+            'mediainfo': formatted_mediainfo,
+            'extracted_images': extracted_images,
+            'torrent_file': metainfo.gettorrent(),
+        }
+        # if genre:
+        #     data['genre'] = genre
 
         plugin.handle(data)
 

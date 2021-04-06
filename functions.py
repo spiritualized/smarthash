@@ -1,9 +1,12 @@
+import logging
 import math, io, os, sys
+import re
 import time
 from enum import Enum
-from typing import List
+from typing import List, Tuple
 
 import cv2
+import imdb
 import requests
 from requests import Response
 from termcolor import colored, cprint
@@ -65,58 +68,6 @@ def imgKeyVariance(item):
     return item[1]
 def imgKeyOrder(item):
     return item[0]
-
-def read_nfo(path):
-    nfo = None
-    try:
-        with open(path, "r") as file:
-            nfo = file.read()
-    except:
-        with open(path, "r", encoding="latin-1") as file:
-            nfo = file.read()
-
-    return nfo
-
-def choose_genre(genres):
-    if len(genres) == 0:
-        return None
-
-    ordered_genres = [
-                        'Sci-Fi',
-                        'Fantasy',
-                        'Film Noir',
-                        'War',
-                        'Western',
-                        'Romance',
-                        'Crime',
-                        'Horror',
-                        'Thriller',
-                        'Mystery',
-                        'Documentary',
-                        'Adventure',
-                        'Action',
-                        'Comedy',
-                        'Drama',
-                        'Sport',
-                        'Animation',
-                        'Superhero',
-                        'Biography',
-                        'Family',
-                        'Music',
-                        'Musical',
-                        'History',
-                        'Short',
-                    ]
-    for genre in ordered_genres:
-        if genre in genres:
-            return genre
-
-    return genres[0]
-
-        #with open("C:\\testhash\\test%d.jpeg" % i, "wb") as file:
-        #	file.write()
-
-#	images = sorted()
 
 def listFiles(parent_dir):
     file_list = []
@@ -219,3 +170,22 @@ def Mp3Info(path):
     results['method'] = "CBR"
 
     return results
+
+def imdb_id_to_url(imdb_id: str) -> str:
+    return "https://www.imdb.com/title/tt{0}/".format(imdb_id)
+
+def imdb_url_to_id(imdb_url: str) -> str:
+    imdb_id_match = re.findall(r"imdb\.com/title/tt(\d{7}\d?)", imdb_url)
+    if imdb_id_match:
+        return imdb_id_match[0]
+
+def verify_imdb(imdb_id: str) -> None:
+    # imdb._logging.setLevel("error")
+    logging.info('IMDb querying...'),
+    imdb_site = imdb.IMDb()
+
+    imdb_movie = imdb_site.get_movie(imdb_id)
+    if not imdb_movie:
+        logging.error("Invalid IMDb ID: {0}".format(imdb_id))
+        raise ValidationError("Invalid IMDb ID: {0}".format(imdb_id))
+    logging.info("IMDb verified: \"{0}\"".format(imdb_movie))

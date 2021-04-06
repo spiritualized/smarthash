@@ -14,13 +14,14 @@ class ParamType(Enum):
 
 class Param:
 	def __init__(self, name: str, param_type: ParamType, label: str = None, default_value = None,
-				 required: bool = True, options: List[str] = None) -> None:
+				 required: bool = True, options: List[str] = None, visible: bool = True) -> None:
 		self.name = name
 		self.param_type = param_type
 		self.label = label
 		self.default_value = default_value
 		self.required = required
 		self.options = options
+		self.visible = visible
 
 
 class BasePlugin(PluginMixin):
