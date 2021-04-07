@@ -10,15 +10,17 @@ class ParamType(Enum):
 	PATH = 1
 	SELECT = 2
 	TEXT = 3
+	BOOLEAN = 4
 
 class HookCommandType(Enum):
 	UPDATE = 1
 	VISIBLE = 2
+	OPTIONS = 3
 
 
 class Param:
 	def __init__(self, name: str, param_type: ParamType, label: str = None, default_value = None,
-				 required: bool = True, options: List[str] = None, visible: bool = True) -> None:
+				 required: bool = False, options: List[str] = None, visible: bool = True) -> None:
 		self.name = name
 		self.param_type = param_type
 		self.label = label

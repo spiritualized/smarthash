@@ -1,5 +1,5 @@
 import logging
-import math, io, os, sys
+import math, os, sys
 import re
 import time
 from enum import Enum
@@ -8,6 +8,7 @@ from typing import List, Tuple
 import cv2
 import imdb
 import requests
+from imdb import IMDbDataAccessError
 from requests import Response
 from termcolor import colored, cprint
 import magic
@@ -176,6 +177,10 @@ def imdb_id_to_url(imdb_id: str) -> str:
 
 def imdb_url_to_id(imdb_url: str) -> str:
     imdb_id_match = re.findall(r"imdb\.com/title/tt(\d{7}\d?)", imdb_url)
+
+    if imdb_url and not imdb_id_match:
+        raise ValidationError(["Invalid IMDb URL"])
+
     if imdb_id_match:
         return imdb_id_match[0]
 
@@ -187,5 +192,5 @@ def verify_imdb(imdb_id: str) -> None:
     imdb_movie = imdb_site.get_movie(imdb_id)
     if not imdb_movie:
         logging.error("Invalid IMDb ID: {0}".format(imdb_id))
-        raise ValidationError("Invalid IMDb ID: {0}".format(imdb_id))
+        raise ValidationError(["Invalid IMDb ID: {0}".format(imdb_id)])
     logging.info("IMDb verified: \"{0}\"".format(imdb_movie))

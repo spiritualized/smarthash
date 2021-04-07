@@ -404,7 +404,7 @@ class SmartHash:
 
 
                 count += 1
-                self.image_extaction_progress_callback(count, images_per_video_file*len(image_paths))
+                self.image_extaction_progress_callback(count, n2*len(image_paths))
 
             # select the N candidates with the highest variance, preserving order
             tmp_variances = sorted(tmp_variances, key=imgKeyVariance, reverse=True)[0:images_per_video_file]
