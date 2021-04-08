@@ -150,6 +150,9 @@ class SmartHashGui(SmartHash):
                 if plugin.title in self.config and param.name in self.config[plugin.title]:
                     default_value = self.config[plugin.title][param.name]
 
+                if param.param_type == ParamType.BOOLEAN and type(default_value) != bool:
+                    default_value = default_value == "True"
+
                 key = "{0}_{1}".format(plugin.get_title(), param.name)
                 metadata = {'plugin': plugin.title, 'name': param.name, 'default_value': param.default_value}
 
@@ -195,7 +198,7 @@ class SmartHashGui(SmartHash):
                         collapsible([[
                             sg.Checkbox(param.label,
                                         key=key,
-                                        default=param.default_value,
+                                        default=default_value,
                                         enable_events=True,
                                         metadata=metadata)
                     ]], visible=param.visible, key=key+'_wrapper' )])
@@ -273,7 +276,7 @@ class SmartHashGui(SmartHash):
             # match the event with inputs to the current plugin, save to global config
             if self.window[event].metadata and 'plugin' in self.window[event].metadata:
                 element_metadata = self.window[event].metadata
-                self.config[element_metadata['plugin']][element_metadata['name']] = values[event]
+                self.config[element_metadata['plugin']][element_metadata['name']] = str(values[event])
 
             # execute hooks
             if event in self.hooks:
