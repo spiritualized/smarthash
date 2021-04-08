@@ -131,7 +131,13 @@ class SmartHashGui(SmartHash):
         for element, hooks in self.hooks.items():
             for hook in hooks:
                 if hook.exec_on_init:
-                    self.exec_hook_commands_async(hook, self.window[element].DefaultText)
+                    value = None
+                    if type(self.window[element]) == sg.Combo:
+                        value = self.window[element].DefaultValue
+                    else:
+                        value = self.window[element].DefaultText
+
+                    self.exec_hook_commands_async(hook, value)
 
         self.background_thread = threading.Thread(target=self.init)
         self.background_thread.start()
@@ -147,11 +153,11 @@ class SmartHashGui(SmartHash):
 
             for param in plugin.parameters:
                 default_value = param.default_value
-                if plugin.title in self.config and param.name in self.config[plugin.title]:
+                if plugin.title in self.config and param.name in self.config[plugin.title] and param.load_last_value:
                     default_value = self.config[plugin.title][param.name]
 
-                if param.param_type == ParamType.BOOLEAN and type(default_value) != bool:
-                    default_value = default_value == "True"
+                    if param.param_type == ParamType.BOOLEAN and type(default_value) != bool:
+                        default_value = default_value == "True"
 
                 key = "{0}_{1}".format(plugin.get_title(), param.name)
                 metadata = {'plugin': plugin.title, 'name': param.name, 'default_value': param.default_value}
@@ -186,7 +192,7 @@ class SmartHashGui(SmartHash):
                             sg.Text(param.label, size=(10, 1)),
                             sg.Combo(param.options,
                                      key=key,
-                                     default_value=param.default_value,
+                                     default_value=default_value,
                                      enable_events=True,
                                      readonly=True,
                                      size=(30, 1),
@@ -289,8 +295,8 @@ class SmartHashGui(SmartHash):
 
         self.window.close()
 
-    def exec_hook_commands_async(self, hook, element):
-        commands = hook.function(element)
+    def exec_hook_commands_async(self, hook, value):
+        commands = hook.function(value)
         for command in commands:
             self.exec_hook_command(command)
 
