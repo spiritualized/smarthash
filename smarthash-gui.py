@@ -16,6 +16,15 @@ def collapsible(layout: List[List], key: str, visible: bool = True) -> sg.pin:
     return sg.pin(sg.Column(layout, key=key, visible=visible))
 
 
+class Args(object):
+    def __getitem__(self, key: str):
+        return getattr(self, key)
+    def __setitem__(self, key, val):
+        setattr(self, key, val)
+    def __contains__(self, item):
+        return hasattr(self, item)
+
+
 class SmartHashGui(SmartHash):
 
     MAIN_WIDTH = 80
@@ -235,8 +244,8 @@ class SmartHashGui(SmartHash):
 
             if event == "create_button":
 
-                self.args = lambda: None
-                setattr(self.args, 'path', values['path_to_hash'])
+                self.args = Args()
+                self.args['path'] = values['path_to_hash']
 
                 for param in self.curr_plugin.parameters:
                     key = "{0}_{1}".format(self.curr_plugin.get_title(), param.name)
