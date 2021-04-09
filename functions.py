@@ -76,6 +76,17 @@ def requests_retriable_put(url: str, **kwargs) -> Response:
 
     return response
 
+def requests_retriable_get(url: str, **kwargs) -> Response:
+    while True:
+        try:
+            response = requests.get(url, **kwargs)
+            break
+        except requests.exceptions.ConnectionError:
+            cprint("Connection error, retrying...", 'red')
+            time.sleep(1)
+
+    return response
+
 def imgKeyVariance(item):
     return item[1]
 def imgKeyOrder(item):
