@@ -156,7 +156,7 @@ class SmartHashGui(SmartHash):
                 if plugin.title in self.config and param.name in self.config[plugin.title] and param.load_last_value:
                     default_value = self.config[plugin.title][param.name]
 
-                    if param.param_type == ParamType.BOOLEAN and type(default_value) != bool:
+                    if param.param_type == ParamType.CHECKBOX and type(default_value) != bool:
                         default_value = default_value == "True"
 
                 key = "{0}_{1}".format(plugin.get_title(), param.name)
@@ -199,7 +199,7 @@ class SmartHashGui(SmartHash):
                                      metadata=metadata)
                         ]], visible=param.visible, key=key+'_wrapper' )])
 
-                elif param.param_type == ParamType.BOOLEAN:
+                elif param.param_type == ParamType.CHECKBOX:
                     elements.append([
                         collapsible([[
                             sg.Checkbox(param.label,
@@ -208,6 +208,19 @@ class SmartHashGui(SmartHash):
                                         enable_events=True,
                                         metadata=metadata)
                     ]], visible=param.visible, key=key+'_wrapper' )])
+
+                elif param.param_type == ParamType.RADIO:
+                    buttons = []
+                    for option in param.options:
+                        buttons.append(
+                            sg.Radio(option,
+                                     key,
+                                     default=(option == param.default_value),
+                                     enable_events=True,
+                                     key=key+'_'+option)
+                        )
+                    elements.append([
+                        collapsible([buttons], visible=param.visible, key=key+'_wrapper' )])
 
             visible = plugin.get_title() == self.curr_plugin.get_title()
             plugin_ui.append(
@@ -257,8 +270,13 @@ class SmartHashGui(SmartHash):
                 self.args['path'] = values['path_to_hash']
 
                 for param in self.curr_plugin.parameters:
-                    key = "{0}_{1}".format(self.curr_plugin.get_title(), param.name)
-                    setattr(self.args, param.name, values[key])
+                    if param.param_type == ParamType.RADIO:
+                        for option in param.options:
+                            if values["{0}_{1}_{2}".format(self.curr_plugin.get_title(), param.name, option)]:
+                                setattr(self.args, param.name, option)
+                    else:
+                        key = "{0}_{1}".format(self.curr_plugin.get_title(), param.name)
+                        setattr(self.args, param.name, values[key])
 
                 self.background_thread = threading.Thread(target=self.hash_func,
                                                           kwargs={'path': values['path_to_hash']})
@@ -317,16 +335,26 @@ class SmartHashGui(SmartHash):
         if not os.path.isdir(values['path_to_hash']):
             create_disabled = True
 
-        elements = {x.name: x for x in self.curr_plugin.parameters}
+        parameters = {x.name: x for x in self.curr_plugin.parameters if x.required}
 
-        for element in elements.values():
+        for param in parameters.values():
 
-            # boolean param types always have a value
-            if element.param_type == ParamType.BOOLEAN:
+            # checkbox param types always have a value
+            if param.param_type == ParamType.CHECKBOX:
                 continue
-            value = values["{0}_{1}".format(self.curr_plugin.get_title(), element.name)]
-            if element.required and not value or value == element.default_value:
-                create_disabled = True
+
+            elif param.param_type == ParamType.RADIO:
+                selected = False
+                for option in param.options:
+                    if values["{0}_{1}_{2}".format(self.curr_plugin.get_title(), param.name, option)]:
+                        selected = True
+                if not selected:
+                    create_disabled = True
+
+            else:
+                value = values["{0}_{1}".format(self.curr_plugin.get_title(), param.name)]
+                if not value or value == param.default_value:
+                    create_disabled = True
 
         if self.is_hashing:
             create_disabled = True

@@ -10,7 +10,8 @@ class ParamType(Enum):
 	PATH = 1
 	SELECT = 2
 	TEXT = 3
-	BOOLEAN = 4
+	CHECKBOX = 4
+	RADIO = 5
 
 class HookCommandType(Enum):
 	UPDATE = 1
