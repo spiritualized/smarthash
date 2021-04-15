@@ -150,6 +150,7 @@ class SmartHash:
         # get the root directory
         root_dir = os.path.dirname(os.path.abspath(__file__))
         if getattr(sys, 'frozen', False):
+            # noinspection PyUnresolvedReferences
             root_dir = sys._MEIPASS
 
         # list the plugin directory for external imports
@@ -295,7 +296,6 @@ class SmartHash:
             'args': self.args,
             'smarthash_info': smarthash_path_info,
             'title': os.path.basename(path),
-        #    'genre': genre,
             'params': params
         })
 
@@ -359,8 +359,6 @@ class SmartHash:
             'extracted_images': extracted_images,
             'torrent_file': metainfo.gettorrent(),
         }
-        # if genre:
-        #     data['genre'] = genre
 
         plugin.handle(data)
 
