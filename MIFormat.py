@@ -11,8 +11,8 @@ def MItostring(mediainfo):
         if track.get('format') == "RLE":
             continue
 
-        #for k,v in track.items():
-        #	print(MIFormatLine(k,v), end="")
+        # for k,v in track.items():
+        # 	print(MIFormatLine(k,v), end="")
 
         if out != "":
             out += "\n"
@@ -118,7 +118,6 @@ def MItostring(mediainfo):
                 out += MIFormatLine("Transfer characteristics", track['transfer_characteristics'])
             if 'matrix_coefficients' in track:
                 out += MIFormatLine("Matrix coefficients", track['matrix_coefficients'])
-
 
         elif track['track_type'] == "Audio":
 

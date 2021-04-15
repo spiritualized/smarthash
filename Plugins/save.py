@@ -1,8 +1,6 @@
 from baseplugin import BasePlugin, Param, ParamType
 import os
 
-from functions import PluginError
-
 
 class SmarthashPlugin(BasePlugin):
 

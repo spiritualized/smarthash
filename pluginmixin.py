@@ -15,6 +15,7 @@ class PluginMixin:
     def __init__(self):
         self.arguments = []
         self.hooks = []
+        self.config = None
 
     def set_config(self, config) -> None:
         self.config = config
