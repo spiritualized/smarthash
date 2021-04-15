@@ -19,8 +19,10 @@ def collapsible(layout: List[List], key: str, visible: bool = True) -> sg.pin:
 class Args(object):
     def __getitem__(self, key: str):
         return getattr(self, key)
+
     def __setitem__(self, key, val):
         setattr(self, key, val)
+
     def __contains__(self, item):
         return hasattr(self, item)
 
@@ -43,6 +45,8 @@ class SmartHashGui(SmartHash):
         self.curr_progress = 0
         self.is_hashing = False
         self.hooks = {}
+
+        self.args = None
 
         for x in plugin_filenames:
             self.plugins[x] = importlib.import_module("Plugins." + x).SmarthashPlugin()
@@ -80,11 +84,11 @@ class SmartHashGui(SmartHash):
 
         plugin_selection = [sg.Text("Select plugin: "),
                             sg.Combo([x.get_title() for x in self.plugins.values()],
-                                    key='plugin_selection',
-                                    default_value=self.curr_plugin.get_title(),
-                                    enable_events=True,
-                                    readonly=True,
-                                    size=(30, 1))]
+                                     key='plugin_selection',
+                                     default_value=self.curr_plugin.get_title(),
+                                     enable_events=True,
+                                     readonly=True,
+                                     size=(30, 1))]
 
         initialization_error = collapsible([
             [sg.MLine(" " * 100, key='initialization_error_ml', visible=False, size=(None, 5), text_color='red')]
@@ -131,7 +135,6 @@ class SmartHashGui(SmartHash):
         for element, hooks in self.hooks.items():
             for hook in hooks:
                 if hook.exec_on_init:
-                    value = None
                     if type(self.window[element]) == sg.Combo:
                         value = self.window[element].DefaultValue
                     else:
@@ -171,7 +174,7 @@ class SmartHashGui(SmartHash):
                                      enable_events=True,
                                      size=(SmartHashGui.MAIN_WIDTH - 12, None),
                                      metadata=metadata)
-                    ]], visible=param.visible, key=key+'_wrapper')])
+                        ]], visible=param.visible, key=key+'_wrapper')])
 
                 elif param.param_type == ParamType.PATH:
                     elements.append([
@@ -183,7 +186,7 @@ class SmartHashGui(SmartHash):
                                      readonly=True,
                                      metadata=metadata),
                             sg.FolderBrowse()
-                    ]], visible=param.visible, key=key+'_wrapper')])
+                        ]], visible=param.visible, key=key+'_wrapper')])
                     self.folder_browsers.append(key)
 
                 elif param.param_type == ParamType.SELECT:
@@ -197,7 +200,7 @@ class SmartHashGui(SmartHash):
                                      readonly=True,
                                      size=(30, 1),
                                      metadata=metadata)
-                        ]], visible=param.visible, key=key+'_wrapper' )])
+                        ]], visible=param.visible, key=key+'_wrapper')])
 
                 elif param.param_type == ParamType.CHECKBOX:
                     elements.append([
@@ -207,7 +210,7 @@ class SmartHashGui(SmartHash):
                                         default=default_value,
                                         enable_events=True,
                                         metadata=metadata)
-                    ]], visible=param.visible, key=key+'_wrapper' )])
+                        ]], visible=param.visible, key=key+'_wrapper')])
 
                 elif param.param_type == ParamType.RADIO:
                     buttons = []
@@ -220,7 +223,7 @@ class SmartHashGui(SmartHash):
                                      key=key+'_'+option)
                         )
                     elements.append([
-                        collapsible([buttons], visible=param.visible, key=key+'_wrapper' )])
+                        collapsible([buttons], visible=param.visible, key=key+'_wrapper')])
 
             visible = plugin.get_title() == self.curr_plugin.get_title()
             plugin_ui.append(

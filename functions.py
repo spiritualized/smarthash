@@ -3,14 +3,12 @@ import math, os, sys
 import re
 import time
 from enum import Enum
-from typing import List, Tuple
+from typing import List
 
-import cv2
 import imdb
 import requests
-from imdb import IMDbDataAccessError
 from requests import Response
-from termcolor import colored, cprint
+from termcolor import cprint
 import magic
 import bitstring
 import json
@@ -22,21 +20,26 @@ class ValidationError(Exception):
     def __init__(self, errors: List[str]):
         self.errors = errors
 
+
 class PluginError(Exception):
-    def __init__(self, error: str):
-        self.error = error
+    def __init__(self, err: str):
+        self.error = err
+
 
 class ServerError(Exception):
-    def __init__(self, error: str):
-        self.error = error
+    def __init__(self, err: str):
+        self.error = err
+
 
 class MagicError(Exception):
-    def __init__(self, error: str):
-        self.error = error
+    def __init__(self, err: str):
+        self.error = err
+
 
 class BulkMode(Enum):
     STANDARD = 1
     MUSIC = 2
+
 
 def error(msg):
     try:
@@ -44,8 +47,8 @@ def error(msg):
         if 'errors' in decoded:
             if len(decoded['errors']) > 1:
                 cprint("Error:", 'red')
-                for error in decoded['errors']:
-                    cprint(error, 'red')
+                for err in decoded['errors']:
+                    cprint(err, 'red')
             else:
                 cprint("Error: {0}".format(decoded['errors'][0]), 'red')
 
@@ -53,6 +56,7 @@ def error(msg):
         cprint(msg, 'red')
 
     sys.exit(1)
+
 
 def requests_retriable_post(url: str, **kwargs) -> Response:
     while True:
@@ -65,6 +69,7 @@ def requests_retriable_post(url: str, **kwargs) -> Response:
 
     return response
 
+
 def requests_retriable_put(url: str, **kwargs) -> Response:
     while True:
         try:
@@ -75,6 +80,7 @@ def requests_retriable_put(url: str, **kwargs) -> Response:
             time.sleep(1)
 
     return response
+
 
 def requests_retriable_get(url: str, **kwargs) -> Response:
     while True:
@@ -89,8 +95,11 @@ def requests_retriable_get(url: str, **kwargs) -> Response:
 
 def imgKeyVariance(item):
     return item[1]
+
+
 def imgKeyOrder(item):
     return item[0]
+
 
 def listFiles(parent_dir):
     file_list = []
@@ -112,6 +121,7 @@ def listFiles(parent_dir):
 
     return file_list
 
+
 def listFilesInner(parent, path, file_list):
     joined_path = os.path.join(parent, path) if path else parent
     for curr in os.scandir(joined_path):
@@ -120,14 +130,14 @@ def listFilesInner(parent, path, file_list):
         elif curr.is_dir():
             listFilesInner(parent, curr.path, file_list)
 
+
 def get_mime_type(path):
-    mime_type = ''
     try:
         with open(path, 'rb') as infile:
             return magic.from_buffer(infile.read(1048576), mime=True)
     except Exception as e:
         raise MagicError("Metadata error, check your 'magic' installation: {0}".format(str(e)))
-    return mime_type
+
 
 def Mp3Info(path):
 
@@ -172,7 +182,7 @@ def Mp3Info(path):
 
                 if results['lame_version'][-1] == ".":
                     results['lame_version'] = results['lame_version'][:-1]
-            except:
+            except Exception:
                 results['method'] = "VBR"
 
         return results
@@ -194,8 +204,10 @@ def Mp3Info(path):
 
     return results
 
+
 def imdb_id_to_url(imdb_id: str) -> str:
     return "https://www.imdb.com/title/tt{0}/".format(imdb_id)
+
 
 def imdb_url_to_id(imdb_url: str) -> str:
     imdb_id_match = re.findall(r"imdb\.com/title/tt(\d{7}\d?)", imdb_url)
@@ -205,6 +217,7 @@ def imdb_url_to_id(imdb_url: str) -> str:
 
     if imdb_id_match:
         return imdb_id_match[0]
+
 
 def verify_imdb(imdb_id: str) -> None:
     # imdb._logging.setLevel("error")
