@@ -4,6 +4,8 @@ import time
 from collections import OrderedDict
 from typing import List, Dict
 
+import cv2
+
 from libprick import Pricker, PrickError
 from mutagen.flac import VCFLACDict
 from mutagen.id3 import ID3
@@ -32,6 +34,10 @@ class SmartHash:
 
     def __init__(self):
         self.early_return = False
+        self.total_media_size = None
+        self.config = None
+        self.args = None
+        self.plugins = {}
         self.init()
 
     def init(self):
@@ -51,7 +57,6 @@ class SmartHash:
         bulk = argparser.add_mutually_exclusive_group()
         bulk.add_argument("--bulk", action='store_true', help="process every item in the path individually")
 
-        self.plugins = {}
         unique_arguments = {}
 
         for x in plugin_filenames:
@@ -103,7 +108,7 @@ class SmartHash:
     def plugin_find() -> List[str]:
         plugin_path = SmartHash.get_plugin_path()
         plugin_filenames = [str(f) for f in os.listdir(plugin_path) if os.path.isfile(os.path.join(plugin_path, f))]
-        plugin_filenames = [ f.split(".")[0] for f in plugin_filenames if f.endswith(".py") ]
+        plugin_filenames = [f.split(".")[0] for f in plugin_filenames if f.endswith(".py")]
 
         if os.path.exists(os.path.join(plugin_path, '__temp__.py')):
             os.remove(os.path.join(plugin_path, '__temp__.py'))
@@ -113,7 +118,6 @@ class SmartHash:
     def plugin_update(self, plugin: BasePlugin):
         plugin.validate_settings()
 
-        new_plugin_src = None
         while True:
             try:
                 new_plugin_src = plugin.get_update(smarthash_version)
@@ -140,10 +144,9 @@ class SmartHash:
                                                                      plugin.plugin_version,
                                                                      new_plugin_module.plugin_version))
                 self.plugins[plugin.get_filename()] = new_plugin_module
-            except:
+            except Exception:
                 cprint("Failed updating to new version of '{0}'".format(plugin.description))
                 sys.exit(1)
-
 
     @staticmethod
     def get_plugin_path() -> str:
@@ -154,7 +157,6 @@ class SmartHash:
 
         # list the plugin directory for external imports
         return os.path.join(root_dir, "Plugins")
-
 
     def process(self):
         path = os.path.abspath(smarthash.args.path)
@@ -188,10 +190,10 @@ class SmartHash:
             cprint("Done{0}\n".format(" " * 40), 'green', end='\r')
 
         except ValidationError as e:
-            for error in e.errors:
-                if len(error) > 400:
-                    error = "<error message is too long to display>"
-                cprint("Error: {0}".format(error), 'red')
+            for err in e.errors:
+                if len(err) > 400:
+                    err = "<error message is too long to display>"
+                cprint("Error: {0}".format(err), 'red')
 
         except (MagicError, PluginError) as e:
             cprint(e.error, 'red')
@@ -225,7 +227,8 @@ class SmartHash:
             mime_type = get_mime_type(file_path)
             mime_prefix = mime_type.split("/")[0]
 
-            if mime_prefix in ["audio", "video"] or ext in whitelist_video_extensions or ext in whitelist_audio_extensions:
+            if mime_prefix in ["audio", "video"] or ext in whitelist_video_extensions \
+                    or ext in whitelist_audio_extensions:
                 self.total_media_size += os.path.getsize(file_path)
                 smarthash_info = OrderedDict()
                 smarthash_info['mediainfo'] = []
@@ -257,8 +260,8 @@ class SmartHash:
                     tags = {}
                     for k in mutagen_file:
                         # filter out >1500 char (presumably binary) tags, except for comment/lyrics
-                        if hasattr(mutagen_file[k], 'text') and \
-                                (len(mutagen_file[k].text) < 1500 or k in ["USLT", "COMM"]) and len(mutagen_file[k].text):
+                        if hasattr(mutagen_file[k], 'text') and len(mutagen_file[k].text) and \
+                                (len(mutagen_file[k].text) < 1500 or k in ["USLT", "COMM"]):
                             tags[k] = [str(x) for x in mutagen_file[k].text]
                         elif isinstance(mutagen_file[k], list):
                             tags[k] = [str(x) for x in mutagen_file[k]]
@@ -278,7 +281,8 @@ class SmartHash:
                     smarthash_info['mp3_info'] = Mp3Info(file_path)
 
                 # count the number of video files
-                if (mime_prefix == "video" or ext in whitelist_video_extensions) and ext not in blacklist_media_extensions:
+                if (mime_prefix == "video" or ext in whitelist_video_extensions) \
+                        and ext not in blacklist_media_extensions:
                     num_video_files += 1
 
                 smarthash_path_info[file] = smarthash_info
@@ -300,7 +304,6 @@ class SmartHash:
 
         # hash the folder
         metainfo = make_meta_file(path, None, params=params, progress=self.hash_progress_callback)
-        #print()
 
         pricker = Pricker(self.pricker_progress_callback)
 
@@ -314,7 +317,7 @@ class SmartHash:
                 # calculate a pricker hash for audio files
                 ext = os.path.splitext(file_path)[1].lower()
                 if smarthash_path_info[file_path]['mime_type'].split('/')[0] in ['audio', 'video'] or \
-                    ext in whitelist_video_extensions or ext in whitelist_audio_extensions:
+                        ext in whitelist_video_extensions or ext in whitelist_audio_extensions:
                     try:
                         pricker.open(os.path.join(path, *file['path']))
                         file['pricker'] = pricker.hexdigest()
@@ -402,7 +405,6 @@ class SmartHash:
                 tmp_images.append(buf.tobytes())
                 tmp_variances.append([i, variance])
 
-
                 count += 1
                 self.image_extaction_progress_callback(count, n2*len(image_paths))
 
@@ -417,17 +419,11 @@ class SmartHash:
     def hash_progress_callback(self, amount) -> None:
         print('Hashing: %.1f%% complete\r' % (amount * 100), end='\r')
 
-
-    def pricker_progress_callback(self, bytes) -> None:
-        print('Hashing again: %.1f%% complete\r' % (bytes / self.total_media_size * 100), end='\r')
+    def pricker_progress_callback(self, num_bytes) -> None:
+        print('Hashing again: %.1f%% complete\r' % (num_bytes / self.total_media_size * 100), end='\r')
 
     def image_extaction_progress_callback(self, x: int, total_images: int) -> None:
         print('Extracting images: %.1f%% complete\r' % (x / total_images * 100), end='\r')
-
-
-    def fatal_error(self, msg: str) -> None:
-        logging.error(msg)
-        sys.exit(1)
 
     def init_error(self, msg: str) -> None:
         cprint(msg, 'red')
