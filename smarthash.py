@@ -185,7 +185,7 @@ class SmartHash:
     def process_folder_wrapper(self, path: str):
         try:
             self.process_folder(path, self.plugins[self.args.plugin])
-            cprint("Done{0}\n".format(" " * 40), 'green', end='\r')
+            cprint("Done{0}".format(" " * 40), 'green')
 
         except ValidationError as e:
             for err in e.errors:
@@ -360,6 +360,7 @@ class SmartHash:
             'torrent_file': metainfo.gettorrent(),
         }
 
+        print("\rCalling plugin '{0}'...".format(plugin.get_title()), end='')
         plugin.handle(data)
 
         # if an operation succeeded, write out the config
@@ -412,13 +413,13 @@ class SmartHash:
         return images
 
     def hash_progress_callback(self, amount) -> None:
-        print('Hashing: %.1f%% complete\r' % (amount * 100), end='\r')
+        print('\rHashing: %.1f%% complete' % (amount * 100), end='')
 
     def pricker_progress_callback(self, num_bytes) -> None:
-        print('Hashing again: %.1f%% complete\r' % (num_bytes / self.total_media_size * 100), end='\r')
+        print('\rHashing again: %.1f%% complete' % (num_bytes / self.total_media_size * 100), end='')
 
     def image_extaction_progress_callback(self, x: int, total_images: int) -> None:
-        print('Extracting images: %.1f%% complete\r' % (x / total_images * 100), end='\r')
+        print('\rExtracting images: %.1f%% complete' % (x / total_images * 100), end='')
 
     def init_error(self, msg: str) -> None:
         cprint(msg, 'red')
