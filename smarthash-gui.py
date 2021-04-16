@@ -142,6 +142,9 @@ class SmartHashGui(SmartHash):
 
                     self.exec_hook_commands_async(hook, value)
 
+        # set the initial state of the create button
+        self.update_create_button(self.window.read(0)[1])
+
         self.background_thread = threading.Thread(target=self.init)
         self.background_thread.start()
 
