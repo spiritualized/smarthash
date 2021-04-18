@@ -114,6 +114,13 @@ class SmartHashGui(SmartHash):
                 sg.FolderBrowse()
             ],
 
+            [
+                sg.Checkbox("Skip video rehash",
+                            key='skip_video_rehash',
+                            default=False,
+                            enable_events=True)
+            ],
+
             plugin_selection,
 
             self.generate_plugin_ui(),
@@ -274,6 +281,7 @@ class SmartHashGui(SmartHash):
 
                 self.args = Args()
                 self.args['path'] = values['path_to_hash']
+                self.args['skip_video_rehash'] = values['skip_video_rehash']
 
                 for param in self.curr_plugin.parameters:
                     if param.param_type == ParamType.RADIO:
