@@ -332,6 +332,9 @@ class SmartHashGui(SmartHash):
         for command in commands:
             self.exec_hook_command(command)
 
+        # update the create button state, since hooks can unset required values
+        self.update_create_button(self.window.read(0)[1])
+
     def exec_hook_command(self, command: HookCommand) -> None:
         if command.command_type == HookCommandType.UPDATE:
             self.window[command.element_name].update(command.value)
