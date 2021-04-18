@@ -339,7 +339,7 @@ class SmartHashGui(SmartHash):
             self.window[command.element_name].update(visible=command.value)
         elif command.command_type == HookCommandType.OPTIONS:
             old_value = self.window[command.element_name].get()
-            new_value = old_value if old_value in self.window[command.element_name].Values \
+            new_value = old_value if old_value in command.value \
                 else self.window[command.element_name].metadata['default_value']
             self.window[command.element_name].update(new_value, values=command.value)
 
