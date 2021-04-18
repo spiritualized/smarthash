@@ -340,7 +340,7 @@ class SmartHash:
             if (mime_prefix == "video" or ext in whitelist_video_extensions) and ext not in blacklist_media_extensions:
                 if formatted_mediainfo != "":
                     formatted_mediainfo += "\n{0}\n".format("-" * 70)
-                formatted_mediainfo += MIFormat.MItostring(
+                formatted_mediainfo += MIFormat.mediainfo_to_string(
                     smarthash_path_info[os.path.join(os.path.basename(path), *file['path'])]['mediainfo'])
 
                 screenshot_files.append(file_path)
