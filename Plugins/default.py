@@ -10,7 +10,6 @@ class SmarthashPlugin(BasePlugin):
 	plugin_version = "2.0.0"
 	title = "Save to file"
 	description = "Save a torrent file only"
-	options = []
 	parameters = [
 		Param('destination', ParamType.PATH, 'Save to: ', 'Select a destination folder')
 	]

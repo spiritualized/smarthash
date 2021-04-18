@@ -128,6 +128,7 @@ class SmartHash:
                 time.sleep(1)
 
         if new_plugin_src != "":
+            # noinspection PyBroadException
             try:
                 plugin_path = self.get_plugin_path()
                 with open(os.path.join(plugin_path, '__temp__.py'), 'w+') as plugin_file:
@@ -150,7 +151,7 @@ class SmartHash:
         # get the root directory
         root_dir = os.path.dirname(os.path.abspath(__file__))
         if getattr(sys, 'frozen', False):
-            # noinspection PyUnresolvedReferences
+            # noinspection PyUnresolvedReferences,PyProtectedMember
             root_dir = sys._MEIPASS
 
         # list the plugin directory for external imports
@@ -346,7 +347,7 @@ class SmartHash:
                 screenshot_files.append(file_path)
 
         if "video-screenshots" in plugin.options:
-            extracted_images = self.extractImages(screenshot_files)
+            extracted_images = self.extract_images(screenshot_files)
 
         # collect the dataset for the plugin
         data = {
@@ -366,7 +367,7 @@ class SmartHash:
         # if an operation succeeded, write out the config
         self.save_config()
 
-    def extractImages(self, image_paths: List[str]) -> List:
+    def extract_images(self, image_paths: List[str]) -> List:
         count = 0
 
         images_per_video_file = 4
