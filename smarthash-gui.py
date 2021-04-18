@@ -100,7 +100,7 @@ class SmartHashGui(SmartHash):
         ]], key='progress_bar_wrapper', visible=False)
 
         hash_result = collapsible([[
-            sg.Text(key='hash_result_txt', size=(60,1))
+            sg.Text(key='hash_result_txt', size=(60, 1))
         ]], key='hash_result', visible=False)
 
         path_to_hash = self.config['Smarthash GUI']['last path'] \
