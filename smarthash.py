@@ -4,20 +4,19 @@ from collections import OrderedDict
 import cv2
 
 from libprick import Pricker, PrickError
+# noinspection PyProtectedMember
 from mutagen.flac import VCFLACDict
 from mutagen.id3 import ID3
 from release_dir_scanner import get_release_dirs
 
 from BitTornado.Application.makemetafile import make_meta_file
 from pymediainfo import MediaInfo
-from termcolor import colored, cprint
 
 import argparse
 import colorama
-import imdb
 import mutagen
 
-import requests, configparser, baseplugin, bitstring
+import configparser
 
 import MIFormat
 from functions import *
