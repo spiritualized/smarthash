@@ -88,7 +88,8 @@ def MItostring(mediainfo):
                 out += MIFormatLine("Frame rate", track['other_frame_rate'][0])
             if 'other_original_frame_rate' in track:
                 out += MIFormatLine("Frame rate mode", track['other_original_frame_rate'][0])
-            out += MIFormatLine("Color space", track['color_space'])
+            if 'color_space' in track:
+                out += MIFormatLine("Color space", track['color_space'])
             if 'chroma_subsampling' in track:
                 out += MIFormatLine("Chroma subsampling", track['chroma_subsampling'])
             out += MIFormatLine("Bit depth", track['other_bit_depth'][0])
