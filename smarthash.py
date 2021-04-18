@@ -49,6 +49,7 @@ class SmartHash:
         argparser.add_argument("--plugin", help="specify a manual output script: " + ", ".join(plugin_filenames),
                                default="default")
         argparser.add_argument("--destination", help="specify a file destination")
+        argparser.add_argument("--skip-video-rehash", action="store_true")
 
         bulk = argparser.add_mutually_exclusive_group()
         bulk.add_argument("--bulk", action='store_true', help="process every item in the path individually")
@@ -313,8 +314,11 @@ class SmartHash:
 
                 # calculate a pricker hash for audio files
                 ext = os.path.splitext(file_path)[1].lower()
-                if smarthash_path_info[file_path]['mime_type'].split('/')[0] in ['audio', 'video'] or \
-                        ext in whitelist_video_extensions or ext in whitelist_audio_extensions:
+                mime_prefix = smarthash_path_info[file_path]['mime_type'].split('/')[0]
+
+                if mime_prefix == 'audio' or ext in whitelist_audio_extensions or \
+                    (not self.args.skip_video_rehash and (mime_prefix == 'video' or ext in whitelist_audio_extensions)):
+
                     try:
                         pricker.open(os.path.join(path, *file['path']))
                         file['pricker'] = pricker.hexdigest()
