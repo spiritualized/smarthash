@@ -1,5 +1,6 @@
 import importlib
 from collections import OrderedDict
+from typing import Dict, Tuple
 
 import cv2
 
@@ -202,18 +203,15 @@ class SmartHash:
             time.sleep(1)
             self.process_folder_wrapper(path)
 
-    def process_folder(self, path: str, plugin: BasePlugin):
-
-        logging.info("----------------------------\n{0}".format(path))
-        print("\n{0}".format(path))
-
+    @staticmethod
+    def extract_smarthash_info(path: str) -> Tuple[int, int, Dict]:
         file_list = listFiles(path)
 
         parent_dir = os.path.abspath(os.path.join(path, os.pardir)) + os.path.sep
         total_duration = 0
         smarthash_path_info = {}
         num_video_files = 0
-        self.total_media_size = 0
+        total_media_size = 0
 
         # extract metadata into a path -> json-metadata map
         for file in file_list:
@@ -228,7 +226,8 @@ class SmartHash:
 
             if mime_prefix in ["audio", "video"] or ext in whitelist_video_extensions \
                     or ext in whitelist_audio_extensions:
-                self.total_media_size += os.path.getsize(file_path)
+                # TODO split calculation into audio and video
+                total_media_size += os.path.getsize(file_path)
                 smarthash_info = OrderedDict()
                 smarthash_info['mediainfo'] = []
                 if mime_type:
@@ -285,6 +284,16 @@ class SmartHash:
                     num_video_files += 1
 
                 smarthash_path_info[file] = smarthash_info
+
+        return total_media_size, total_duration, smarthash_path_info
+
+
+    def process_folder(self, path: str, plugin: BasePlugin):
+
+        logging.info("----------------------------\n{0}".format(path))
+        print("\n{0}".format(path))
+
+        self.total_media_size, total_duration, smarthash_path_info = self.extract_smarthash_info(path)
 
         params = {
             'blacklist_file_extensions': [x.lower() for x in blacklist_file_extensions],
