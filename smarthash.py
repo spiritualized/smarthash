@@ -1,21 +1,14 @@
 import importlib
-from collections import OrderedDict
-from typing import Dict, Tuple
 
 import cv2
 
 from libprick import Pricker, PrickError
-# noinspection PyProtectedMember
-from mutagen.flac import VCFLACDict
-from mutagen.id3 import ID3
 from release_dir_scanner import get_release_dirs
 
 from BitTornado.Application.makemetafile import make_meta_file
-from pymediainfo import MediaInfo
 
 import argparse
 import colorama
-import mutagen
 
 import configparser
 
@@ -203,97 +196,12 @@ class SmartHash:
             time.sleep(1)
             self.process_folder_wrapper(path)
 
-    @staticmethod
-    def extract_smarthash_info(path: str) -> Tuple[int, int, Dict]:
-        file_list = listFiles(path)
-
-        parent_dir = os.path.abspath(os.path.join(path, os.pardir)) + os.path.sep
-        total_duration = 0
-        smarthash_path_info = {}
-        num_video_files = 0
-        total_media_size = 0
-
-        # extract metadata into a path -> json-metadata map
-        for file in file_list:
-            ext = os.path.splitext(file)[1].lower()
-            # ignore extensions blacklist
-            if ext in blacklist_media_extensions:
-                continue
-
-            file_path = os.path.join(parent_dir, file)
-            mime_type = get_mime_type(file_path)
-            mime_prefix = mime_type.split("/")[0]
-
-            if mime_prefix in ["audio", "video"] or ext in whitelist_video_extensions \
-                    or ext in whitelist_audio_extensions:
-                # TODO split calculation into audio and video
-                total_media_size += os.path.getsize(file_path)
-                smarthash_info = OrderedDict()
-                smarthash_info['mediainfo'] = []
-                if mime_type:
-                    smarthash_info['mime_type'] = mime_type
-
-                media_info = MediaInfo.parse(file_path)
-                for track in media_info.tracks:
-                    track_map = track.to_data()
-
-                    # remove the full path for privacy's sake
-                    if track_map['track_type'] == "General":
-                        track_map['complete_name'] = track_map['complete_name'].replace(parent_dir, "")
-                        track_map['folder_name'] = track_map['folder_name'].replace(parent_dir, "")
-                        if 'duration' in track_map:
-                            total_duration += track_map['duration']
-
-                    smarthash_info['mediainfo'].append(track_map)
-
-                # extract audio tags
-                if mime_prefix == "audio" or ext in whitelist_audio_extensions:
-                    smarthash_info['tags'] = OrderedDict()
-
-                    mutagen_file = mutagen.File(file_path)  # easy=True
-
-                    if not mutagen_file:
-                        continue
-
-                    tags = {}
-                    for k in mutagen_file:
-                        # filter out >1500 char (presumably binary) tags, except for comment/lyrics
-                        if hasattr(mutagen_file[k], 'text') and len(mutagen_file[k].text) and \
-                                (len(mutagen_file[k].text) < 1500 or k in ["USLT", "COMM"]):
-                            tags[k] = [str(x) for x in mutagen_file[k].text]
-                        elif isinstance(mutagen_file[k], list):
-                            tags[k] = [str(x) for x in mutagen_file[k]]
-
-                    for tag in sorted(tags):
-                        smarthash_info['tags'][tag] = tags[tag]
-
-                    if isinstance(mutagen_file.tags, VCFLACDict):
-                        smarthash_info['tag_type'] = 'FLAC'
-                    elif isinstance(mutagen_file.tags, ID3):
-                        smarthash_info['tag_type'] = 'ID3'
-                    smarthash_info['length'] = mutagen_file.info.length
-                    smarthash_info['bitrate'] = mutagen_file.info.bitrate
-
-                # Xing frame info
-                if mime_type == "audio/mpeg" or ext == ".mp3":
-                    smarthash_info['mp3_info'] = Mp3Info(file_path)
-
-                # count the number of video files
-                if (mime_prefix == "video" or ext in whitelist_video_extensions) \
-                        and ext not in blacklist_media_extensions:
-                    num_video_files += 1
-
-                smarthash_path_info[file] = smarthash_info
-
-        return total_media_size, total_duration, smarthash_path_info
-
-
     def process_folder(self, path: str, plugin: BasePlugin):
 
         logging.info("----------------------------\n{0}".format(path))
         print("\n{0}".format(path))
 
-        self.total_media_size, total_duration, smarthash_path_info = self.extract_smarthash_info(path)
+        self.total_media_size, total_duration, smarthash_path_info = extract_metadata(path)
 
         params = {
             'blacklist_file_extensions': [x.lower() for x in blacklist_file_extensions],
@@ -326,7 +234,8 @@ class SmartHash:
                 mime_prefix = smarthash_path_info[file_path]['mime_type'].split('/')[0]
 
                 if mime_prefix == 'audio' or ext in whitelist_audio_extensions or \
-                    (not self.args.skip_video_rehash and (mime_prefix == 'video' or ext in whitelist_audio_extensions)):
+                        (not self.args.skip_video_rehash and
+                         (mime_prefix == 'video' or ext in whitelist_audio_extensions)):
 
                     try:
                         pricker.open(os.path.join(path, *file['path']))
