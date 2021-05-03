@@ -368,13 +368,13 @@ class SmartHashGui(SmartHash):
             elif param.param_type == ParamType.RADIO:
                 selected = False
                 for option in param.options:
-                    if values["{0}_{1}_{2}".format(self.curr_plugin.get_title(), param.name, option)]:
+                    if values.get("{0}_{1}_{2}".format(self.curr_plugin.get_title(), param.name, option)):
                         selected = True
                 if not selected:
                     create_disabled = True
 
             else:
-                value = values["{0}_{1}".format(self.curr_plugin.get_title(), param.name)]
+                value = values.get("{0}_{1}".format(self.curr_plugin.get_title(), param.name))
                 if not value or value == param.default_value:
                     create_disabled = True
 
