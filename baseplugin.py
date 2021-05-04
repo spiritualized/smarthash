@@ -18,6 +18,7 @@ class HookCommandType(Enum):
     UPDATE = 1
     VISIBLE = 2
     OPTIONS = 3
+    RESET_DEFAULT = 4
 
 
 class Param:
@@ -43,7 +44,7 @@ class Hook:
 
 
 class HookCommand:
-    def __init__(self, command_type: HookCommandType, element_name: str, value):
+    def __init__(self, command_type: HookCommandType, element_name: str, value = None):
         self.command_type = command_type
         self.element_name = element_name
         self.value = value
