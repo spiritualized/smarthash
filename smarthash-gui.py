@@ -350,6 +350,8 @@ class SmartHashGui(SmartHash):
             new_value = old_value if old_value in command.value \
                 else self.window[command.element_name].metadata['default_value']
             self.window[command.element_name].update(new_value, values=command.value)
+        elif command.command_type == HookCommandType.RESET_DEFAULT:
+            self.window[command.element_name].update(self.window[command.element_name].metadata['default_value'])
 
     def update_create_button(self, values: Dict) -> None:
         # reevaluate the create button's disabled status for all changes
