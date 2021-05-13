@@ -165,6 +165,9 @@ class SmartHashGui(SmartHash):
             elements = []
 
             for param in plugin.parameters:
+                if not param.enable_in_gui:
+                    continue
+
                 default_value = param.default_value
                 if plugin.title in self.config and param.name in self.config[plugin.title] and param.load_last_value:
                     default_value = self.config[plugin.title][param.name]
@@ -289,6 +292,8 @@ class SmartHashGui(SmartHash):
                 self.args['skip_video_rehash'] = values['skip_video_rehash']
 
                 for param in self.curr_plugin.parameters:
+                    if not param.enable_in_gui:
+                        continue
                     if param.param_type == ParamType.RADIO:
                         for option in param.options:
                             if values["{0}_{1}_{2}".format(self.curr_plugin.get_title(), param.name, option)]:
