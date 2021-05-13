@@ -22,17 +22,20 @@ class HookCommandType(Enum):
 
 
 class Param:
-    def __init__(self, name: str, param_type: ParamType, label: str = None, default_value=None, required: bool = False,
-                 options: List[str] = None, visible: bool = True, disabled: bool = False,
-                 load_last_value: bool = True) -> None:
+    def __init__(self, name: str, param_type: ParamType, label: str = None, default_value=None, help: str = None,
+                 type: type = None, required: bool = False, options: List[str] = None, visible: bool = True,
+                 disabled: bool = False, enable_in_gui: bool = True, load_last_value: bool = True) -> None:
         self.name = name
         self.param_type = param_type
         self.label = label
         self.default_value = default_value
+        self.help = help
+        self.type = type
         self.required = required
         self.options = options
         self.visible = visible
         self.disabled = disabled
+        self.enable_in_gui = enable_in_gui
         self.load_last_value = load_last_value
 
 

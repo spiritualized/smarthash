@@ -9,7 +9,8 @@ class SmarthashPlugin(BasePlugin):
 	description = "Writes extracted data out to a folder"
 	options = ['video-screenshots']
 	parameters = [
-		Param('destination', ParamType.PATH, 'Save to: ', 'Select a destination folder')
+		Param('destination', ParamType.PATH, 'Save to: ', 'Select a destination folder',
+			  help='Save torrent and metadata to a folder')
 	]
 
 	def handle(self, data) -> None:
