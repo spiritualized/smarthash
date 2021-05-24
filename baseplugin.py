@@ -13,6 +13,11 @@ class ParamType(Enum):
     CHECKBOX = 4
     RADIO = 5
 
+class UIMode(Enum):
+    CLI = 1
+    GUI = 2
+    BOTH = 3
+
 
 class HookCommandType(Enum):
     UPDATE = 1
@@ -24,7 +29,8 @@ class HookCommandType(Enum):
 class Param:
     def __init__(self, name: str, param_type: ParamType, label: str = None, default_value=None, help: str = None,
                  type: type = None, required: bool = False, options: List[str] = None, visible: bool = True,
-                 disabled: bool = False, enable_in_gui: bool = True, load_last_value: bool = True) -> None:
+                 disabled: bool = False, display_only: bool = False, ui_mode: UIMode = UIMode.BOTH,
+                 load_last_value: bool = True) -> None:
         self.name = name
         self.param_type = param_type
         self.label = label
@@ -35,7 +41,8 @@ class Param:
         self.options = options
         self.visible = visible
         self.disabled = disabled
-        self.enable_in_gui = enable_in_gui
+        self.display_only = display_only
+        self.ui_mode = ui_mode
         self.load_last_value = load_last_value
 
 

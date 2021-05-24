@@ -7,7 +7,7 @@ from typing import List, Dict
 import PySimpleGUI as sg
 from termcolor import cprint
 
-from baseplugin import ParamType, BasePlugin, HookCommandType, HookCommand
+from baseplugin import ParamType, BasePlugin, HookCommandType, HookCommand, UIMode
 from functions import PluginError, ServerError, ValidationError
 from smarthash import smarthash_version, SmartHash, MagicError
 
@@ -165,7 +165,7 @@ class SmartHashGui(SmartHash):
             elements = []
 
             for param in plugin.parameters:
-                if not param.enable_in_gui:
+                if param.ui_mode not in [UIMode.GUI, UIMode.BOTH]:
                     continue
 
                 default_value = param.default_value
@@ -292,7 +292,7 @@ class SmartHashGui(SmartHash):
                 self.args['skip_video_rehash'] = values['skip_video_rehash']
 
                 for param in self.curr_plugin.parameters:
-                    if not param.enable_in_gui:
+                    if param.ui_mode not in [UIMode.GUI, UIMode.BOTH] or param.display_only:
                         continue
                     if param.param_type == ParamType.RADIO:
                         for option in param.options:

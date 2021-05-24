@@ -15,7 +15,7 @@ import configparser
 import MIFormat
 from functions import *
 from config import *
-from baseplugin import BasePlugin
+from baseplugin import BasePlugin, ParamType, UIMode
 
 smarthash_version = "2.4.0"
 
@@ -42,13 +42,13 @@ class SmartHash:
         argparser.add_argument('--version', action='version', version="SmartHash {0}".format(smarthash_version))
         argparser.add_argument("--plugin", help="specify a manual output script: " + ", ".join(plugin_filenames),
                                default="default")
-        argparser.add_argument("--destination", help="specify a file destination")
         argparser.add_argument("--skip-video-rehash", action="store_true")
 
         bulk = argparser.add_mutually_exclusive_group()
         bulk.add_argument("--bulk", action='store_true', help="process every item in the path individually")
 
         unique_arguments = {}
+        unique_params = {}
 
         for x in plugin_filenames:
             self.plugins[x] = importlib.import_module("Plugins." + x).SmarthashPlugin()
@@ -69,11 +69,40 @@ class SmartHash:
                 elif 'help' in unique_arguments[arg.argument] and 'help' in arg.kwargs \
                         and unique_arguments[arg.argument]['help'] != arg.kwargs['help']:
                     logging.warning("Ignoring argument from plugin '{plugin}': {arg}"
-                                    .format(plugin=self.plugins[x].description, arg=arg.argument))
+                                    .format(plugin=self.plugins[x].title, arg=arg.argument))
+
+            # store unique plugin parameters
+            for param in self.plugins[x].parameters:
+                if param.name not in unique_params:
+                    unique_params[param.name] = param
+                elif unique_params[param.name].help != param.help and x not in ['default', 'save']:
+                    logging.warning("Ignoring argument from plugin '{plugin}': {param}"
+                                    .format(plugin=self.plugins[x].title, param=param.name))
+
 
         # register arguments with argparse
-        for arg in unique_arguments:
-            argparser.add_argument(arg, **unique_arguments[arg])
+        # for arg in unique_arguments:
+        #     argparser.add_argument(arg, **unique_arguments[arg])
+
+        # register parameters with argparse
+        for param in unique_params.values():
+            if param.ui_mode not in [UIMode.CLI, UIMode.BOTH] or param.display_only:
+                continue
+
+            arg_name = '--' + param.name.replace(' ', '-').replace('_', '-')
+            kwargs = {}
+            if param.help:
+                kwargs['help'] = param.help
+            if param.default_value:
+                kwargs['default'] = param.default_value
+            if param.param_type in [ParamType.SELECT, ParamType.RADIO]:
+                kwargs['choices'] = [x.lower() for x in param.options]
+            if param.param_type == ParamType.CHECKBOX:
+                kwargs['action'] = 'store_true'
+            else:
+                kwargs['type'] = str.lower
+
+            argparser.add_argument(arg_name, **kwargs)
 
         self.args = argparser.parse_args()
 
