@@ -1,5 +1,6 @@
 import importlib
 
+# noinspection PyPackageRequirements
 import cv2
 
 from libprick import Pricker, PrickError
@@ -61,16 +62,6 @@ class SmartHash:
             if self.plugins[x].title not in self.config:
                 self.config[self.plugins[x].title] = {}
 
-            # store unique argparse argument registrations
-            for arg in self.plugins[x].arguments:
-                if arg.argument not in unique_arguments:
-                    unique_arguments[arg.argument] = arg.kwargs
-
-                elif 'help' in unique_arguments[arg.argument] and 'help' in arg.kwargs \
-                        and unique_arguments[arg.argument]['help'] != arg.kwargs['help']:
-                    logging.warning("Ignoring argument from plugin '{plugin}': {arg}"
-                                    .format(plugin=self.plugins[x].title, arg=arg.argument))
-
             # store unique plugin parameters
             for param in self.plugins[x].parameters:
                 if param.name not in unique_params:
@@ -78,11 +69,6 @@ class SmartHash:
                 elif unique_params[param.name].help != param.help and x not in ['default', 'save']:
                     logging.warning("Ignoring argument from plugin '{plugin}': {param}"
                                     .format(plugin=self.plugins[x].title, param=param.name))
-
-
-        # register arguments with argparse
-        # for arg in unique_arguments:
-        #     argparser.add_argument(arg, **unique_arguments[arg])
 
         # register parameters with argparse
         for param in unique_params.values():

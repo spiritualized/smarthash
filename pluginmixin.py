@@ -13,15 +13,11 @@ class PluginMixin:
     parameters = {}
 
     def __init__(self):
-        self.arguments = []
         self.hooks = []
         self.config = None
 
     def set_config(self, config) -> None:
         self.config = config
-
-    def add_argument(self, argument: str, **kwargs):
-        self.arguments.append(PluginArgument(argument, **kwargs))
 
     def get_filename(self):
         return os.path.basename(sys.modules[self.__module__].__file__)
