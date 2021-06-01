@@ -372,6 +372,9 @@ class SmartHashGui(SmartHash):
             if param.param_type == ParamType.CHECKBOX:
                 continue
 
+            if param.display_only or not param.visible:
+                continue
+
             elif param.param_type == ParamType.RADIO:
                 selected = False
                 for option in param.options:
