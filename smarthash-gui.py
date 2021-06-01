@@ -186,7 +186,7 @@ class SmartHashGui(SmartHash):
                                      key=key,
                                      enable_events=True,
                                      size=(SmartHashGui.MAIN_WIDTH - 12, None),
-                                     disabled=param.disabled,
+                                     disabled=(param.disabled or param.display_only),
                                      metadata=metadata)
                         ]], visible=param.visible, key=key+'_wrapper')])
 
@@ -198,7 +198,7 @@ class SmartHashGui(SmartHash):
                                      key=key,
                                      enable_events=True,
                                      readonly=True,
-                                     disabled=param.disabled,
+                                     disabled=(param.disabled or param.display_only),
                                      metadata=metadata),
                             sg.FolderBrowse()
                         ]], visible=param.visible, key=key+'_wrapper')])
@@ -214,7 +214,7 @@ class SmartHashGui(SmartHash):
                                      enable_events=True,
                                      readonly=True,
                                      size=(30, 1),
-                                     disabled=param.disabled,
+                                     disabled=(param.disabled or param.display_only),
                                      metadata=metadata)
                         ]], visible=param.visible, key=key+'_wrapper')])
 
@@ -225,7 +225,7 @@ class SmartHashGui(SmartHash):
                                         key=key,
                                         default=default_value,
                                         enable_events=True,
-                                        disabled=param.disabled,
+                                     disabled=(param.disabled or param.display_only),
                                         metadata=metadata)
                         ]], visible=param.visible, key=key+'_wrapper')])
 
@@ -237,7 +237,7 @@ class SmartHashGui(SmartHash):
                                      key,
                                      default=(option == param.default_value),
                                      enable_events=True,
-                                     disabled=param.disabled,
+                                     disabled=(param.disabled or param.display_only),
                                      key=key+'_'+option)
                         )
                     elements.append([
