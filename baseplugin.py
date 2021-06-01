@@ -28,15 +28,16 @@ class HookCommandType(Enum):
 
 class Param:
     def __init__(self, name: str, param_type: ParamType, label: str = None, default_value=None, help: str = None,
-                 type: type = None, required: bool = False, options: List[str] = None, visible: bool = True,
-                 disabled: bool = False, display_only: bool = False, ui_mode: UIMode = UIMode.BOTH,
-                 load_last_value: bool = True) -> None:
+                 type: type = None, force_lowercase: bool = False, required: bool = False, options: List[str] = None,
+                 visible: bool = True, disabled: bool = False, display_only: bool = False,
+                 ui_mode: UIMode = UIMode.BOTH, load_last_value: bool = True) -> None:
         self.name = name
         self.param_type = param_type
         self.label = label
         self.default_value = default_value
         self.help = help
         self.type = type
+        self.force_lowercase = force_lowercase
         self.required = required
         self.options = options
         self.visible = visible

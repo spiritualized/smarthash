@@ -18,7 +18,7 @@ class SmarthashPlugin(BasePlugin):
 		meta_folder = data['path']+"_smarthash"
 
 		# manual destination
-		if data['args'].destination:
+		if data['args'].destination != self.parameters[0].default_value:
 			meta_folder = self.manual_destination(data['args'].destination, data['title'])
 
 		if os.path.isfile(meta_folder):
