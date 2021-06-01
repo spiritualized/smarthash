@@ -83,9 +83,10 @@ class SmartHash:
                 kwargs['default'] = param.default_value
             if param.param_type in [ParamType.SELECT, ParamType.RADIO]:
                 kwargs['choices'] = [x.lower() for x in param.options]
+
             if param.param_type == ParamType.CHECKBOX:
                 kwargs['action'] = 'store_true'
-            else:
+            elif param.force_lowercase:
                 kwargs['type'] = str.lower
 
             argparser.add_argument(arg_name, **kwargs)
