@@ -29,3 +29,6 @@ class PluginMixin:
         for param in self.parameters:
             if param.name == name:
                 return param.default_value
+
+    def create_valid(self) -> bool:
+        return True

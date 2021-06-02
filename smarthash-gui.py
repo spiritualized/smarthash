@@ -364,6 +364,10 @@ class SmartHashGui(SmartHash):
         if not os.path.isdir(values['path_to_hash']):
             create_disabled = True
 
+        # Check plugin-specific logic for if the torrent can be created
+        if not self.curr_plugin.create_valid():
+            create_disabled = True
+
         parameters = {x.name: x for x in self.curr_plugin.parameters if x.required}
 
         for param in parameters.values():
