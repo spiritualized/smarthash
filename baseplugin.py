@@ -48,10 +48,11 @@ class Param:
 
 
 class Hook:
-    def __init__(self, element_name: str, function, exec_on_init=False):
+    def __init__(self, element_name: str, function, exec_on_init: bool=False, exec_on_default: bool=False):
         self.element_name = element_name
         self.function = function
         self.exec_on_init = exec_on_init
+        self.exec_on_default = exec_on_default
 
 
 class HookCommand:
