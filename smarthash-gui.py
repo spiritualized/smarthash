@@ -8,7 +8,7 @@ import PySimpleGUI as sg
 from termcolor import cprint
 
 from baseplugin import ParamType, BasePlugin, HookCommandType, HookCommand, UIMode
-from functions import PluginError, ServerError, ValidationError
+from functions import PluginError, ServerError, ValidationError, folder_default
 from smarthash import smarthash_version, SmartHash, MagicError
 
 
@@ -50,7 +50,9 @@ class SmartHashGui(SmartHash):
 
         for x in plugin_filenames:
             self.plugins[x] = importlib.import_module("Plugins." + x).SmarthashPlugin()
-            self.plugins[x].set_config(self.config[self.plugins[x].title])
+
+            if self.plugins[x].title in self.config:
+                self.plugins[x].set_config(self.config[self.plugins[x].title])
 
             if not hasattr(self.plugins[x], 'handle'):
                 self.init_error("Could not import \"{0}\" plugin".format(x))
@@ -104,7 +106,7 @@ class SmartHashGui(SmartHash):
         ]], key='hash_result', visible=False)
 
         path_to_hash = self.config['Smarthash GUI']['last path'] \
-            if self.config['Smarthash GUI']['last path'] else 'Select a folder to hash'
+            if self.config['Smarthash GUI']['last path'] else folder_default
 
         main = collapsible([
             [sg.Text("Create a torrent from a folder")],
@@ -141,12 +143,16 @@ class SmartHashGui(SmartHash):
         # execute hooks
         for element, hooks in self.hooks.items():
             for hook in hooks:
-                if hook.exec_on_init:
-                    if type(self.window[element]) == sg.Combo:
-                        value = self.window[element].DefaultValue
-                    else:
-                        value = self.window[element].DefaultText
+                if type(self.window[element]) == sg.Combo:
+                    value = self.window[element].DefaultValue
+                else:
+                    value = self.window[element].DefaultText
 
+                # Don't execute hook for default values if set
+                if not hook.exec_on_default and self.window[element] == value:
+                    continue
+
+                if hook.exec_on_init:
                     self.exec_hook_commands_async(hook, value)
 
         # set the initial state of the create button

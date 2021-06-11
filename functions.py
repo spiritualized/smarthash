@@ -36,6 +36,10 @@ class ServerError(Exception):
     def __init__(self, err: str):
         self.error = err
 
+class UpdateError(Exception):
+    def __init__(self, err: str):
+        self.error = err
+
 
 class MagicError(Exception):
     def __init__(self, err: str):
@@ -45,6 +49,8 @@ class MagicError(Exception):
 class BulkMode(Enum):
     STANDARD = 1
     MUSIC = 2
+
+folder_default = 'Select a folder to hash'
 
 
 def error(msg):

@@ -137,6 +137,11 @@ class SmartHash:
 
                 time.sleep(1)
 
+            except UpdateError as e:
+                cprint(e.error, 'red')
+                return
+
+
         if new_plugin_src != "":
             # noinspection PyBroadException
             try:
