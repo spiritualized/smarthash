@@ -53,7 +53,9 @@ class SmartHash:
 
         for x in plugin_filenames:
             self.plugins[x] = importlib.import_module("Plugins." + x).SmarthashPlugin()
-            self.plugins[x].set_config(self.config[self.plugins[x].title])
+
+            if self.plugins[x].title in self.config:
+                self.plugins[x].set_config(self.config[self.plugins[x].title])
 
             if not hasattr(self.plugins[x], 'handle'):
                 self.init_error("Could not import \"{0}\" plugin".format(x))
