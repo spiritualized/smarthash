@@ -185,7 +185,7 @@ class SmartHash:
         if self.args.bulk:
             bulk_mode = self.plugins[self.args.plugin].get_bulk_mode(self.args)
             if bulk_mode == BulkMode.STANDARD:
-                for item in os.scandir(path):
+                for item in sorted(os.listdir(path)):
                     curr = os.path.join(path, item)
                     if os.path.isdir(curr):
                         self.process_folder_wrapper(curr)
