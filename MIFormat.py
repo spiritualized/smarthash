@@ -195,7 +195,7 @@ def mediainfo_to_string(mediainfo):
             out += format_line("Default", track['default'])
             out += format_line("Forced", track['forced'])
 
-        elif track['track_type'] == "Menu":
+        elif track['track_type'] in ["Menu", "Other"]:
             pass
 
         else:
