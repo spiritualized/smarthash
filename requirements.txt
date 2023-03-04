@@ -3,7 +3,7 @@ cinemagoer>=2022.12.27
 colorama>=0.3.9
 libprick>=1.1.0
 mutagen>=1.40.0
-numpy==1.19.0
+numpy==1.22.0
 opencv-python-headless>=3.4.0.12
 pymediainfo>=2.2.1
 PyInstaller>=3.4
