@@ -1,6 +1,6 @@
 bitstring>=3.1.5
+cinemagoer>=2022.12.27
 colorama>=0.3.9
-IMDbPY>=6.5
 libprick>=1.1.0
 mutagen>=1.40.0
 numpy==1.19.0

@@ -234,7 +234,7 @@ def imdb_url_to_id(imdb_url: str) -> str:
 def verify_imdb(imdb_id: str) -> None:
     # imdb._logging.setLevel("error")
     logging.info('IMDb querying...'),
-    imdb_site = imdb.IMDb()
+    imdb_site = imdb.Cinemagoer()
 
     imdb_movie = imdb_site.get_movie(imdb_id)
     if not imdb_movie:
