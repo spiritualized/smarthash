@@ -48,7 +48,6 @@ class SmartHash:
         bulk = argparser.add_mutually_exclusive_group()
         bulk.add_argument("--bulk", action='store_true', help="process every item in the path individually")
 
-        unique_arguments = {}
         unique_params = {}
 
         for x in plugin_filenames:
@@ -142,7 +141,6 @@ class SmartHash:
             except UpdateError as e:
                 cprint(e.error, 'red')
                 return
-
 
         if new_plugin_src != "":
             # noinspection PyBroadException
@@ -350,8 +348,8 @@ class SmartHash:
                 self.image_extaction_progress_callback(count, n2*len(image_paths))
 
             # select the N candidates with the highest variance, preserving order
-            tmp_variances = sorted(tmp_variances, key=imgKeyVariance, reverse=True)[0:images_per_video_file]
-            tmp_variances = sorted(tmp_variances, key=imgKeyOrder)
+            tmp_variances = sorted(tmp_variances, key=img_key_variance, reverse=True)[0:images_per_video_file]
+            tmp_variances = sorted(tmp_variances, key=img_key_order)
 
             images.append([tmp_images[x[0]] for x in tmp_variances])
 
