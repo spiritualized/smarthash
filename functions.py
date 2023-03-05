@@ -1,22 +1,24 @@
+import json
 import logging
-import math, os, sys
+import math
+import os
 import re
+import sys
 import time
 from collections import OrderedDict
 from enum import Enum
 from typing import List, Tuple, Dict
 
-import imdb
+import bitstring
+import imdb  # noqa
+import magic
 import mutagen
 import requests
-from mutagen.flac import VCFLACDict
+from mutagen.flac import VCFLACDict  # noqa
 from mutagen.id3 import ID3
 from pymediainfo import MediaInfo
 from requests import Response
 from termcolor import cprint
-import magic
-import bitstring
-import json
 
 from config import blacklist_file_extensions, blacklist_path_matches, whitelist_video_extensions, \
     blacklist_media_extensions, whitelist_audio_extensions
@@ -36,6 +38,7 @@ class ServerError(Exception):
     def __init__(self, err: str):
         self.error = err
 
+
 class UpdateError(Exception):
     def __init__(self, err: str):
         self.error = err
@@ -49,6 +52,7 @@ class MagicError(Exception):
 class BulkMode(Enum):
     STANDARD = 1
     MUSIC = 2
+
 
 folder_default = 'Select a folder to hash'
 
@@ -105,17 +109,18 @@ def requests_retriable_get(url: str, **kwargs) -> Response:
 
     return response
 
-def imgKeyVariance(item):
+
+def img_key_variance(item):
     return item[1]
 
 
-def imgKeyOrder(item):
+def img_key_order(item):
     return item[0]
 
 
-def listFiles(parent_dir):
+def list_files(parent_dir):
     file_list = []
-    listFilesInner(parent_dir, None, file_list)
+    list_files_inner(parent_dir, None, file_list)
 
     for x in blacklist_path_matches:
         for file in file_list:
@@ -134,13 +139,13 @@ def listFiles(parent_dir):
     return file_list
 
 
-def listFilesInner(parent, path, file_list):
+def list_files_inner(parent, path, file_list):
     joined_path = os.path.join(parent, path) if path else parent
     for curr in os.scandir(joined_path):
         if curr.is_file():
             file_list.append(os.path.relpath(curr.path, parent))
         elif curr.is_dir():
-            listFilesInner(parent, curr.path, file_list)
+            list_files_inner(parent, curr.path, file_list)
 
 
 def get_mime_type(path):
@@ -151,16 +156,16 @@ def get_mime_type(path):
         raise MagicError("Metadata error, check your 'magic' installation: {0}".format(str(e)))
 
 
-def Mp3Info(path):
+def mp3_info(path):
 
     results = {}
 
     stream = bitstring.ConstBitStream(filename=path)
 
     # look for Xing
-    Xing = stream.find("0x58696E67", bytealigned=True)
+    xing_header = stream.find("0x58696E67", bytealigned=True)
 
-    if Xing:
+    if xing_header:
         results['xing_header'] = "XING"
         results['method'] = "VBR"
         stream.bytepos += 4
@@ -181,8 +186,9 @@ def Mp3Info(path):
         if lame_version[0:4] == b"LAME":
             results['xing_header'] = "LAME"
 
-            # allow for broken/hacked LAME versions, treat as regular VBR
+            # noinspection PyBroadException
             try:
+                # allow for broken/hacked LAME versions, treat as regular VBR
                 results['lame_version'] = lame_version[4:].decode().strip()
                 results['lame_tag_revision'] = stream.read("uint:4")
                 results['lame_vbr_method'] = stream.read("uint:4")
@@ -199,14 +205,14 @@ def Mp3Info(path):
 
         return results
 
-    Info = stream.find("0x496E666F", bytealigned=True)
-    if Info:
+    info_header = stream.find("0x496E666F", bytealigned=True)
+    if info_header:
         results['xing_header'] = "INFO"
         results['method'] = "CBR"
         return results
 
-    VBRI = stream.find("0x56425249", bytealigned=True)
-    if VBRI:
+    vbri_header = stream.find("0x56425249", bytealigned=True)
+    if vbri_header:
         results['xing_header'] = "VBRI"
         results['method'] = "VBR"
         return results
@@ -244,7 +250,7 @@ def verify_imdb(imdb_id: str) -> None:
 
 
 def extract_metadata(path: str) -> Tuple[int, int, Dict]:
-    file_list = listFiles(path)
+    file_list = list_files(path)
 
     parent_dir = os.path.abspath(os.path.join(path, os.pardir)) + os.path.sep
     total_duration = 0
@@ -315,7 +321,7 @@ def extract_metadata(path: str) -> Tuple[int, int, Dict]:
 
             # Xing frame info
             if mime_type == "audio/mpeg" or ext == ".mp3":
-                smarthash_info['mp3_info'] = Mp3Info(file_path)
+                smarthash_info['mp3_info'] = mp3_info(file_path)
 
             # count the number of video files
             if (mime_prefix == "video" or ext in whitelist_video_extensions) \
