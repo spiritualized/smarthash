@@ -1,6 +1,5 @@
-import os, sys
 from enum import Enum
-from typing import List, Dict, Optional
+from typing import List, Optional
 
 from functions import PluginError, BulkMode
 from pluginmixin import PluginMixin
