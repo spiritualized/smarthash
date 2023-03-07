@@ -21,6 +21,16 @@ from baseplugin import BasePlugin, ParamType, UIMode
 smarthash_version = "2.4.0"
 
 
+class PluginUIInterface:
+    """Interface allowing plugins to communicate with the UI"""
+    def __init__(self, smarthash_obj: "SmartHash", plugin: "BasePlugin"):
+        self.smarthash_obj = smarthash_obj
+        self.plugin = plugin
+
+    def progress_callback(self, message: str, incremental: bool = True) -> None:
+        self.smarthash_obj.plugin_progress_callback(f"[{self.plugin.get_title()}] {message}", incremental)
+
+
 class SmartHash:
 
     def __init__(self):
@@ -294,6 +304,7 @@ class SmartHash:
         # collect the dataset for the plugin
         data = {
             'smarthash_version': smarthash_version,
+            'ui_interface': PluginUIInterface(self, plugin),
             'args': self.args,
             'path': path,
             'title': os.path.split(path)[-1],
@@ -303,7 +314,7 @@ class SmartHash:
             'torrent_file': metainfo.gettorrent(),
         }
 
-        print("\rCalling plugin '{0}'...".format(plugin.get_title()), end='')
+        print("\rCalling plugin '{0}'...".format(plugin.get_title()))
         plugin.handle(data)
 
         # if an operation succeeded, write out the config
@@ -368,6 +379,11 @@ class SmartHash:
 
     def image_extaction_progress_callback(self, x: int, total_images: int) -> None:
         print('\rExtracting images: %.1f%% complete' % (x / total_images * 100), end='')
+
+    def plugin_progress_callback(self, message: str, incremental: bool) -> None:
+        """Callback for slow plugin progress updates. Pass incremental=True to overwrite the previous line."""
+        start = "\r" if incremental else ''
+        print(f"{start}{message}", end='')
 
     def init_error(self, msg: str) -> None:
         cprint(msg, 'red')
