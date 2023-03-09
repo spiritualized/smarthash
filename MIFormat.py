@@ -66,7 +66,8 @@ def mediainfo_to_string(mediainfo):
                 out += format_line("Format settings, RefFrames", track['codec_settings_refframes'])
             if 'muxing_mode' in track:
                 out += format_line("Muxing mode", track['muxing_mode'])
-            out += format_line("Codec ID", track['codec_id'])
+            if 'codec_id' in track:
+                out += format_line("Codec ID", track['codec_id'])
             if 'codec_id_hint' in track:
                 out += format_line("Codec ID/Hint", track['codec_id_hint'])
             if 'other_duration' in track:
@@ -123,8 +124,8 @@ def mediainfo_to_string(mediainfo):
                 out += format_line("Matrix coefficients", track['matrix_coefficients'])
 
         elif track['track_type'] == "Audio":
-
-            out += format_line("ID", track['track_id'])
+            if 'track_id' in track:
+                out += format_line("ID", track['track_id'])
             out += format_line("Format", track['format'])
             if 'format_version' in track:
                 out += format_line("Format version", track['format_version'])
@@ -134,7 +135,8 @@ def mediainfo_to_string(mediainfo):
                 out += format_line("Format settings", track['format_settings'])
             if 'format_info' in track:
                 out += format_line("Format/Info", track['format_info'])
-            out += format_line("Codec ID", track['codec_id'])
+            if 'codec_id' in track:
+                out += format_line("Codec ID", track['codec_id'])
             if 'codec_id_hint' in track:
                 out += format_line("Codec ID/Hint", track['codec_id_hint'])
             if 'other_duration' in track:
@@ -177,7 +179,8 @@ def mediainfo_to_string(mediainfo):
         elif track['track_type'] == "Text":
             out += format_line("ID", track['track_id'])
             out += format_line("Format", track['format'])
-            out += format_line("Codec ID", track['codec_id'])
+            if 'codec_id' in track:
+                out += format_line("Codec ID", track['codec_id'])
             if 'codec_info' in track:
                 out += format_line("Codec ID/Info", track['codec_info'])
             if 'other_duration' in track:
@@ -192,8 +195,10 @@ def mediainfo_to_string(mediainfo):
                 out += format_line("Title", track['title'][0])
             if 'other_language' in track:
                 out += format_line("Language", track['other_language'][0])
-            out += format_line("Default", track['default'])
-            out += format_line("Forced", track['forced'])
+            if 'default' in track:
+                out += format_line("Default", track['default'])
+            if 'forced' in track:
+                out += format_line("Forced", track['forced'])
 
         elif track['track_type'] in ["Menu", "Other"]:
             pass
