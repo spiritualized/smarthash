@@ -363,7 +363,7 @@ class SmartHash:
                 self.image_extaction_progress_callback(count, n2*len(image_paths))
 
             # select the N candidates with the highest variance, preserving order
-            num_images = max(images_per_video_file, len(tmp_images))
+            num_images = min(images_per_video_file, len(tmp_images))
             tmp_variances = sorted(tmp_variances, key=img_key_variance, reverse=True)[0:num_images]
             tmp_variances = sorted(tmp_variances, key=img_key_order)
 
