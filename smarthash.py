@@ -183,7 +183,7 @@ class SmartHash:
         return os.path.join(root_dir, "Plugins")
 
     def process(self):
-        path = os.path.abspath(smarthash.args.path)
+        path = os.path.abspath(self.args.path)
 
         # check absolute
         if not os.path.isdir(path):
