@@ -1,4 +1,4 @@
-import collections
+import collections.abc
 import urllib
 
 
@@ -200,7 +200,7 @@ class TypedDict(CopyMixin, dict):
                             "{:d}".format(nargs))
         if args:
             arg = args[0]
-            if isinstance(arg, collections.Mapping):
+            if isinstance(arg, collections.abc.Mapping):
                 for key in arg:
                     self[key] = arg[key]
             elif isinstance(arg, collections.Iterable):

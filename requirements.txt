@@ -9,8 +9,10 @@ pymediainfo>=2.2.1
 PyInstaller>=3.4
 pypiwin32>=223 ; sys_platform == 'win32'
 PySimpleGUI==4.32.1
-python-magic>=0.4.15
+python-magic~=0.4.13
 python-magic-bin>=0.4.14 ; sys_platform == 'win32' or sys_platform == 'darwin'
 requests>=2.18.4
 release-dir-scanner>=1.0.1
 termcolor>=1.1.0
+mockito~=1.4.0
+urllib3~=1.26.4
