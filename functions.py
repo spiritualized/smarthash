@@ -14,6 +14,7 @@ import imdb  # noqa
 import magic
 import mutagen
 import requests
+from imdb import IMDbDataAccessError
 from mutagen.flac import VCFLACDict  # noqa
 from mutagen.id3 import ID3
 from pymediainfo import MediaInfo
@@ -228,7 +229,7 @@ def imdb_id_to_url(imdb_id: str) -> str:
 
 
 def imdb_url_to_id(imdb_url: str) -> str:
-    imdb_id_match = re.findall(r"imdb\.com/title/tt(\d{7}\d?)", imdb_url)
+    imdb_id_match = re.findall(r"imdb\.com/title/tt(\d{7,8})", imdb_url)
 
     if imdb_url and not imdb_id_match:
         raise ValidationError(["Invalid IMDb URL"])
@@ -242,8 +243,9 @@ def verify_imdb(imdb_id: str) -> None:
     logging.info('IMDb querying...'),
     imdb_site = imdb.Cinemagoer()
 
-    imdb_movie = imdb_site.get_movie(imdb_id)
-    if not imdb_movie:
+    try:
+        imdb_movie = imdb_site.get_movie(imdb_id)
+    except IMDbDataAccessError:
         logging.error("Invalid IMDb ID: {0}".format(imdb_id))
         raise ValidationError(["Invalid IMDb ID: {0}".format(imdb_id)])
     logging.info("IMDb verified: \"{0}\"".format(imdb_movie))
