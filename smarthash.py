@@ -54,6 +54,7 @@ class SmartHash:
         argparser.add_argument("--plugin", help="specify a manual output script: " + ", ".join(plugin_filenames),
                                default="default")
         argparser.add_argument("--skip-video-rehash", action="store_true")
+        argparser.add_argument("--disable-blacklist", action="store_true", help="Include unwanted files in torrent")
 
         bulk = argparser.add_mutually_exclusive_group()
         bulk.add_argument("--bulk", action='store_true', help="process every item in the path individually")
@@ -234,9 +235,11 @@ class SmartHash:
 
         self.total_media_size, total_duration, smarthash_path_info = extract_metadata(path)
 
+        blacklist_path_matches_enabled = [] if self.args.disable_blacklist else blacklist_path_matches
+
         params = {
             'blacklist_file_extensions': [x.lower() for x in blacklist_file_extensions],
-            'blacklist_path_matches': [x.lower() for x in blacklist_path_matches],
+            'blacklist_path_matches': [x.lower() for x in blacklist_path_matches_enabled],
             'comment': "Generated with SmartHash {0}".format(smarthash_version),
             'smarthash_version': smarthash_version,
         }
