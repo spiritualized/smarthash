@@ -14,8 +14,8 @@ FIXTURES_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'f
 PATHS = {
     'audio_1': os.path.join(FIXTURES_ROOT, 'audio', 'Example Artist - 2000 - Example Album 1 [CBR128]'),
     'audio_1_file': os.path.join(FIXTURES_ROOT, 'audio', 'Example Artist - 2000 - Example Album 1 [CBR128]',
-                                 '01 - Example Title.mp3'),
-    'audio_2': os.path.join(FIXTURES_ROOT, 'audio', 'Example Artist - Example Album 2'),
+                                 'Example Track.mp3'),
+    'audio_2': os.path.join(FIXTURES_ROOT, 'audio', 'Example Artist - 2000 - Example Album 2 [CBR128]'),
     'audio_bulk': os.path.join(FIXTURES_ROOT, 'audio'),
     'video': os.path.join(FIXTURES_ROOT, 'video', 'video_1'),
     'video_file': os.path.join(FIXTURES_ROOT, 'video', 'video_1', 'example-mp4-file-small.mp4'),

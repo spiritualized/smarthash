@@ -45,8 +45,8 @@ class FunctionTests(unittest.TestCase):
     def test_list_files(self):
         list_path = os.path.join(FIXTURES_ROOT, 'audio')
         expected = [
-            """audio\\Example Artist - Example Album 1\\01 - Example Title.mp3""",
-            """audio\\Example Artist - Example Album 2\\01 - Example Title.mp3"""
+            """audio\\Example Artist - 2000 - Example Album 1 [CBR128]\\Example Track.mp3""",
+            """audio\\Example Artist - 2000 - Example Album 2 [CBR128]\\Example Track.mp3"""
         ]
         file_list = list_files(list_path)
 
