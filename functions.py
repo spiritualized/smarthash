@@ -123,18 +123,6 @@ def list_files(parent_dir):
     file_list = []
     list_files_inner(parent_dir, None, file_list)
 
-    for x in blacklist_path_matches:
-        for file in file_list:
-            if x.lower() in file.lower():
-                file_list.remove(file)
-                continue
-
-    for x in blacklist_file_extensions:
-        for file in file_list:
-            if file.lower().endswith(x.lower()):
-                file_list.remove(file)
-                continue
-
     file_list = [os.path.join(os.path.split(parent_dir)[-1], f) for f in file_list]
 
     return file_list
