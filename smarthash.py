@@ -323,14 +323,27 @@ class SmartHash:
         # if an operation succeeded, write out the config
         self.save_config()
 
-    def extract_images(self, image_paths: List[str]) -> List:
+    def extract_images(self, screenshot_files_in: List[str]) -> List:
         count = 0
+        screenshot_files = screenshot_files_in
 
         images_per_video_file = 4
-        if len(image_paths) in [2, 3]:
+        if len(screenshot_files) in [2, 3]:
             images_per_video_file = 2
-        elif len(image_paths) > 3:
+        elif len(screenshot_files) > 3:
             images_per_video_file = 1
+
+            # extract screenshots from one file per subfolder, for large numbers of files
+            if len(screenshot_files) > 12 and len(set([os.path.split(x)[0] for x in screenshot_files])) > 1:
+                screenshot_files = []
+                screenshot_file_prefixes = []
+                for screenshot_file in screenshot_files_in:
+                    prefix = os.path.split(screenshot_file)[0]
+                    if prefix not in screenshot_file_prefixes:
+                        screenshot_file_prefixes.append(prefix)
+                        screenshot_files.append(screenshot_file)
+
+
 
         n2 = images_per_video_file * 2 + 10
         if n2 < 10:
@@ -338,7 +351,7 @@ class SmartHash:
 
         images = []
 
-        for path in image_paths:
+        for path in screenshot_files:
             vidcap = cv2.VideoCapture(path)
 
             # take frames at regular intervals from a range excluding the first and last 10% of the file
@@ -363,7 +376,7 @@ class SmartHash:
                     logging.error(f"Screenshot extraction failed ({i+1} of {n2})")
 
                 count += 1
-                self.image_extaction_progress_callback(count, n2*len(image_paths))
+                self.image_extaction_progress_callback(count, n2*len(screenshot_files))
 
             # select the N candidates with the highest variance, preserving order
             num_images = min(images_per_video_file, len(tmp_images))
