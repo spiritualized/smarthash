@@ -46,7 +46,7 @@ class FunctionTests(unittest.TestCase):
         list_path = os.path.join(FIXTURES_ROOT, 'audio')
         expected = [
             os.path.join("audio", "Example Artist - 2000 - Example Album 1 [CBR128]", "Example Track.mp3"),
-            os.path.join("audio", "Pink Floyd - 1973 - Dark Side of the Moon [CBR128]", "Example Track.mp3")
+            os.path.join("audio", "Pink Floyd - 1973 - The Dark Side of the Moon [CBR128]", "Example Track.mp3")
         ]
         file_list = list_files(list_path)
 
