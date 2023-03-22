@@ -7,6 +7,7 @@ import sys
 import time
 from collections import OrderedDict
 from enum import Enum
+from pathlib import Path
 from typing import List, Tuple, Dict
 
 import bitstring
@@ -321,3 +322,47 @@ def extract_metadata(path: str) -> Tuple[int, int, Dict]:
             smarthash_path_info[file] = smarthash_info
 
     return total_media_size, total_duration, smarthash_path_info
+
+
+def filter_screenshot_paths(paths_in: List[str], root: str) -> List[str]:
+    """For large numbers of videos, group by subfolder (multilevel) and return one per subfolder"""
+    if len(paths_in) <= 8:
+        return paths_in
+
+    # Calculate the max prefix length (the max depth in the structure)
+    max_prefix_length = max([len(Path(x.replace(root, '')[1:]).parts[:-1]) for x in paths_in])
+    curr_prefix_length = max_prefix_length
+
+    # Start with the longest possible prefix. As the prefix shortens, there will be more matches per prefix
+    while curr_prefix_length >= 0:
+        curr_set = filter_screenshot_paths_inner(paths_in, root, curr_prefix_length)
+
+        # set is too small, return first 8 from the last set
+        if len(curr_set) <= 2 and curr_prefix_length < max_prefix_length:
+            curr_set = filter_screenshot_paths_inner(paths_in, root, curr_prefix_length+1)
+            return curr_set[:8]
+
+        if len(curr_set) <= 8:
+            return curr_set
+
+        # At the shortest possible prefix, return up to 8 matches
+        if curr_prefix_length == 0:
+            return curr_set[:8]
+
+        curr_prefix_length -= 1
+
+
+def filter_screenshot_paths_inner(paths_in: List[str], root: str, prefix_length: int) -> List[str]:
+    """extract screenshots from one file per subfolder, for large numbers of files"""
+    assert prefix_length >= 0
+
+    screenshot_files = []
+    screenshot_file_prefixes = []
+    for screenshot_file in paths_in:
+        parts = Path(screenshot_file.replace(root, '')[1:]).parts[:-1]  # only the folders, remove the filename
+        prefix = Path(*parts[:min(len(parts), prefix_length)])
+
+        if prefix not in screenshot_file_prefixes:
+            screenshot_file_prefixes.append(prefix)
+            screenshot_files.append(screenshot_file)
+    return screenshot_files

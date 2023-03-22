@@ -7,7 +7,7 @@ from mockito import when, ANY, verify
 
 from functions import error, requests_retriable_post, requests_retriable_put, requests_retriable_get, img_key_variance, \
     list_files, get_mime_type, MagicError, mp3_info, imdb_id_to_url, imdb_url_to_id, ValidationError, verify_imdb, \
-    extract_metadata, img_key_order
+    extract_metadata, img_key_order, filter_screenshot_paths
 from tests.test_smarthash import FIXTURES_ROOT, PATHS
 
 
@@ -86,3 +86,75 @@ class FunctionTests(unittest.TestCase):
 
             metadata = extract_metadata(PATHS['video'])
             assert expected == json.dumps(metadata)
+
+
+    def test_filter_screenshot_paths(self):
+        test_paths = [
+            "C:\\root\\folder1\\video01.avi",
+            "C:\\root\\folder1\\video02.avi",
+            "C:\\root\\folder1\\video03.avi",
+            "C:\\root\\folder1\\video04.avi",
+            "C:\\root\\folder1\\video05.avi",
+            "C:\\root\\folder1\\video06.avi",
+            "C:\\root\\folder2\\video07.avi",
+            "C:\\root\\folder2\\video08.avi",
+        ]
+
+        filtered_paths = filter_screenshot_paths(test_paths, "C:\\root")
+
+        # <= 8, no filtering
+        assert len(test_paths) == len(filtered_paths)
+
+        test_paths.append("C:\\root\\folder2\\video09.avi")
+
+        filtered_paths = filter_screenshot_paths(test_paths, "C:\\root")
+        expected = [
+            "C:\\root\\folder1\\video01.avi",
+            "C:\\root\\folder2\\video07.avi",
+        ]
+        # Multiple top-level folders, 2 expected
+        assert filtered_paths == expected
+
+        test_paths = [
+            "C:\\root\\folder1\\subfolder01\\video01.avi",
+            "C:\\root\\folder1\\subfolder02\\video02.avi",
+            "C:\\root\\folder1\\subfolder03\\video03.avi",
+            "C:\\root\\folder1\\subfolder04\\video04.avi",
+            "C:\\root\\folder1\\subfolder05\\video05.avi",
+            "C:\\root\\folder1\\subfolder06\\video06.avi",
+            "C:\\root\\folder2\\subfolder07\\video07.avi",
+            "C:\\root\\folder2\\subfolder08\\video08.avi",
+            "C:\\root\\folder2\\subfolder09\\video09.avi",
+            "C:\\root\\folder2\\subfolder10\\video10.avi",
+            "C:\\root\\folder2\\subfolder11\\video11.avi",
+            "C:\\root\\folder2\\subfolder12\\video12.avi",
+        ]
+
+        filtered_paths = filter_screenshot_paths(test_paths, "C:\\root")
+
+        assert filtered_paths == test_paths[:8]
+
+
+        test_paths = [
+            "C:\\root\\folder01\\subfolder01\\video01.avi",
+            "C:\\root\\folder02\\subfolder02\\video02.avi",
+            "C:\\root\\folder03\\subfolder03\\video03.avi",
+            "C:\\root\\folder04\\subfolder04\\video04.avi",
+            "C:\\root\\folder05\\subfolder05\\video05.avi",
+            "C:\\root\\folder06\\subfolder06\\video06.avi",
+            "C:\\root\\folder07\\subfolder07\\video07.avi",
+            "C:\\root\\folder08\\subfolder08\\video08.avi",
+            "C:\\root\\folder09\\subfolder09\\video09.avi",
+            "C:\\root\\folder10\\subfolder10\\video10.avi",
+            "C:\\root\\folder11\\subfolder11\\video11.avi",
+            "C:\\root\\folder12\\subfolder12\\video12.avi",
+        ]
+
+        filtered_paths = filter_screenshot_paths(test_paths, "C:\\root")
+        expected = [
+            "C:\\root\\folder01\\subfolder01\\video01.avi",
+            "C:\\root\\folder02\\subfolder02\\video02.avi",
+            "C:\\root\\folder03\\subfolder03\\video03.avi",
+            "C:\\root\\folder04\\subfolder04\\video04.avi",
+        ]
+        assert filtered_paths == test_paths[:8]

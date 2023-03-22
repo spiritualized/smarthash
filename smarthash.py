@@ -323,9 +323,8 @@ class SmartHash:
         # if an operation succeeded, write out the config
         self.save_config()
 
-    def extract_images(self, screenshot_files_in: List[str]) -> List:
+    def extract_images(self, screenshot_files: List[str]) -> List:
         count = 0
-        screenshot_files = screenshot_files_in
 
         images_per_video_file = 4
         if len(screenshot_files) in [2, 3]:
@@ -333,17 +332,7 @@ class SmartHash:
         elif len(screenshot_files) > 3:
             images_per_video_file = 1
 
-            # extract screenshots from one file per subfolder, for large numbers of files
-            if len(screenshot_files) > 12 and len(set([os.path.split(x)[0] for x in screenshot_files])) > 1:
-                screenshot_files = []
-                screenshot_file_prefixes = []
-                for screenshot_file in screenshot_files_in:
-                    prefix = os.path.split(screenshot_file)[0]
-                    if prefix not in screenshot_file_prefixes:
-                        screenshot_file_prefixes.append(prefix)
-                        screenshot_files.append(screenshot_file)
-
-
+        screenshot_files = filter_screenshot_paths(screenshot_files, self.args.path)
 
         n2 = images_per_video_file * 2 + 10
         if n2 < 10:
