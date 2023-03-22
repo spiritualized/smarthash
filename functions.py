@@ -332,15 +332,15 @@ def filter_screenshot_paths(paths_in: List[str], root: str) -> List[str]:
     # Calculate the max prefix length (the max depth in the structure)
     max_prefix_length = max([len(Path(x.replace(root, '')[1:]).parts[:-1]) for x in paths_in])
     curr_prefix_length = max_prefix_length
+    last_set = paths_in
 
     # Start with the longest possible prefix. As the prefix shortens, there will be more matches per prefix
     while curr_prefix_length >= 0:
         curr_set = filter_screenshot_paths_inner(paths_in, root, curr_prefix_length)
 
         # set is too small, return first 8 from the last set
-        if len(curr_set) <= 2 and curr_prefix_length < max_prefix_length:
-            curr_set = filter_screenshot_paths_inner(paths_in, root, curr_prefix_length+1)
-            return curr_set[:8]
+        if len(curr_set) <= 2 and curr_prefix_length <= max_prefix_length:
+            return last_set[:8]
 
         if len(curr_set) <= 8:
             return curr_set
@@ -350,6 +350,7 @@ def filter_screenshot_paths(paths_in: List[str], root: str) -> List[str]:
             return curr_set[:8]
 
         curr_prefix_length -= 1
+        last_set = curr_set
 
 
 def filter_screenshot_paths_inner(paths_in: List[str], root: str, prefix_length: int) -> List[str]:

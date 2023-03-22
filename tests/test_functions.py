@@ -112,7 +112,7 @@ class FunctionTests(unittest.TestCase):
             "C:\\root\\folder2\\video07.avi",
         ]
         # Multiple top-level folders, 2 expected
-        assert filtered_paths == expected
+        assert filtered_paths == test_paths[:8]
 
         test_paths = [
             "C:\\root\\folder1\\subfolder01\\video01.avi",
@@ -169,6 +169,26 @@ class FunctionTests(unittest.TestCase):
             "C:\\root\\folder10\\subfolder10\\video10.avi",
             "C:\\root\\folder11\\subfolder11\\video11.avi",
             "C:\\root\\folder12\\subfolder12\\video12.avi",
+        ]
+
+        filtered_paths = filter_screenshot_paths(test_paths, "C:\\root")
+
+        # First 8 paths expected
+        assert filtered_paths == test_paths[:8]
+
+        test_paths = [
+            "C:\\root\\folder0\\video01.avi",
+            "C:\\root\\folder0\\video02.avi",
+            "C:\\root\\folder0\\video03.avi",
+            "C:\\root\\folder0\\video04.avi",
+            "C:\\root\\folder0\\video05.avi",
+            "C:\\root\\folder0\\video06.avi",
+            "C:\\root\\folder0\\video07.avi",
+            "C:\\root\\folder0\\video08.avi",
+            "C:\\root\\folder0\\video09.avi",
+            "C:\\root\\folder0\\video10.avi",
+            "C:\\root\\folder0\\video11.avi",
+            "C:\\root\\folder0\\video12.avi",
         ]
 
         filtered_paths = filter_screenshot_paths(test_paths, "C:\\root")
