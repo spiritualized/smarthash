@@ -22,7 +22,8 @@ from pymediainfo import MediaInfo
 from requests import Response
 from termcolor import cprint
 
-from config import whitelist_video_extensions, blacklist_media_extensions, whitelist_audio_extensions
+from config import whitelist_video_extensions, blacklist_media_extensions, whitelist_audio_extensions, \
+    requests_retry_interval
 
 
 class ValidationError(Exception):
@@ -82,7 +83,12 @@ def requests_retriable_post(url: str, **kwargs) -> Response:
             break
         except (requests.exceptions.ConnectionError, requests.exceptions.Timeout):
             cprint("Connection error, retrying...", 'red')
-            time.sleep(5)
+            time.sleep(requests_retry_interval)
+        except requests.exceptions.RequestException as e:
+            if e.response.status_code in [504]:
+                cprint(f"HTTP error {e.response.status_code}, retrying...", 'red')
+                time.sleep(requests_retry_interval)
+            raise e
 
     return response
 
@@ -94,7 +100,12 @@ def requests_retriable_put(url: str, **kwargs) -> Response:
             break
         except (requests.exceptions.ConnectionError, requests.exceptions.Timeout):
             cprint("Connection error, retrying...", 'red')
-            time.sleep(5)
+            time.sleep(requests_retry_interval)
+        except requests.exceptions.RequestException as e:
+            if e.response.status_code in [504]:
+                cprint(f"HTTP error {e.response.status_code}, retrying...", 'red')
+                time.sleep(requests_retry_interval)
+            raise e
 
     return response
 
@@ -106,7 +117,12 @@ def requests_retriable_get(url: str, **kwargs) -> Response:
             break
         except (requests.exceptions.ConnectionError, requests.exceptions.Timeout):
             cprint("Connection error, retrying...", 'red')
-            time.sleep(5)
+            time.sleep(requests_retry_interval)
+        except requests.exceptions.RequestException as e:
+            if e.response.status_code in [504]:
+                cprint(f"HTTP error {e.response.status_code}, retrying...", 'red')
+                time.sleep(requests_retry_interval)
+            raise e
 
     return response
 
