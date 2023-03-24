@@ -5,4 +5,6 @@ blacklist_media_extensions = [".sub"] # do not extract metainfo from these file 
 whitelist_video_extensions = [".mkv", ".avi", ".mp4"] # always extract metainfo from these file extensions
 whitelist_audio_extensions = [".mp3", ".flac"] # always extract metainfo from these file extensions
 
+requests_retry_interval = 5  # seconds
+
 config_filename = "smarthash.ini"
