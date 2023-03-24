@@ -22,8 +22,7 @@ from pymediainfo import MediaInfo
 from requests import Response
 from termcolor import cprint
 
-from config import blacklist_file_extensions, blacklist_path_matches, whitelist_video_extensions, \
-    blacklist_media_extensions, whitelist_audio_extensions
+from config import whitelist_video_extensions, blacklist_media_extensions, whitelist_audio_extensions
 
 
 class ValidationError(Exception):
@@ -81,9 +80,9 @@ def requests_retriable_post(url: str, **kwargs) -> Response:
         try:
             response = requests.post(url, **kwargs)
             break
-        except requests.exceptions.ConnectionError:
+        except (requests.exceptions.ConnectionError, requests.exceptions.Timeout):
             cprint("Connection error, retrying...", 'red')
-            time.sleep(1)
+            time.sleep(5)
 
     return response
 
@@ -93,9 +92,9 @@ def requests_retriable_put(url: str, **kwargs) -> Response:
         try:
             response = requests.put(url, **kwargs)
             break
-        except requests.exceptions.ConnectionError:
+        except (requests.exceptions.ConnectionError, requests.exceptions.Timeout):
             cprint("Connection error, retrying...", 'red')
-            time.sleep(1)
+            time.sleep(5)
 
     return response
 
@@ -105,9 +104,9 @@ def requests_retriable_get(url: str, **kwargs) -> Response:
         try:
             response = requests.get(url, **kwargs)
             break
-        except requests.exceptions.ConnectionError:
+        except (requests.exceptions.ConnectionError, requests.exceptions.Timeout):
             cprint("Connection error, retrying...", 'red')
-            time.sleep(1)
+            time.sleep(5)
 
     return response
 
