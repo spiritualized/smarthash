@@ -311,6 +311,7 @@ class SmartHash:
             'args': self.args,
             'path': path,
             'title': os.path.split(path)[-1],
+            'smarthash_info': smarthash_path_info,
             'total_duration': total_duration,
             'mediainfo': formatted_mediainfo,
             'extracted_images': extracted_images,
