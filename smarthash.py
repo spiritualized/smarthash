@@ -2,6 +2,7 @@ import importlib
 
 # noinspection PyPackageRequirements
 import cv2
+import requests.utils
 
 from libprick import Pricker, PrickError
 from release_dir_scanner import get_release_dirs
@@ -19,6 +20,7 @@ from config import *
 from baseplugin import BasePlugin, ParamType, UIMode
 
 smarthash_version = "2.4.0"
+requests.utils.default_user_agent = lambda: f"SmartHash/{smarthash_version}"
 
 
 class PluginUIInterface:
