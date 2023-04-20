@@ -225,8 +225,8 @@ class SmartHash:
         except (MagicError, PluginError) as e:
             cprint(e.error, 'red')
 
-        except ServerError:
-            cprint(f"Server error, retrying in {requests_retry_interval} seconds...", "red")
+        except ServerError as e:
+            cprint(f"Server error [{e.error}], retrying in {requests_retry_interval} seconds...", "red")
             time.sleep(requests_retry_interval)
             self.process_folder_wrapper(path)
 
