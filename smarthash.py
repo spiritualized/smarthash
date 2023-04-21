@@ -216,6 +216,8 @@ class SmartHash:
             self.process_folder(path, self.plugins[self.args.plugin])
             cprint("Done{0}".format(" " * 40), 'green')
 
+        except ConflictError as e:
+            cprint(f"Skipped: {e.message}", 'yellow')
         except ValidationError as e:
             for err in e.errors:
                 if len(err) > 400:
