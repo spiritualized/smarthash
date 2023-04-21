@@ -8,7 +8,7 @@ import time
 from collections import OrderedDict
 from enum import Enum
 from pathlib import Path
-from typing import List, Tuple, Dict
+from typing import List, Tuple, Dict, Optional
 
 import bitstring
 import imdb  # noqa
@@ -27,8 +27,16 @@ from config import whitelist_video_extensions, blacklist_media_extensions, white
 
 
 class ValidationError(Exception):
+    """Raised by plugins when incomplete or invalid files or metadata is passed in"""
     def __init__(self, errors: List[str]):
         self.errors = errors
+
+
+class ConflictError(Exception):
+    """Raised by plugins when the operation was skipped (e.g. during a duplicate upload attempt)"""
+    def __init__(self, message: str, params: Dict[str, str] = None):
+        self.message = message
+        self.params = params
 
 
 class PluginError(Exception):
