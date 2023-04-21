@@ -19,7 +19,7 @@ from functions import *
 from config import *
 from baseplugin import BasePlugin, ParamType, UIMode
 
-smarthash_version = "2.4.0"
+smarthash_version = "3.0.0"
 requests.utils.default_user_agent = lambda: f"SmartHash/{smarthash_version}"
 
 
