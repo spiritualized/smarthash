@@ -6,7 +6,7 @@ mutagen>=1.40.0
 numpy==1.22.0
 opencv-python-headless>=3.4.0.12
 pymediainfo>=2.2.1
-PyInstaller>=3.4
+PyInstaller>=5.10.1
 pypiwin32>=223 ; sys_platform == 'win32'
 PySimpleGUI==4.32.1
 python-magic~=0.4.13
