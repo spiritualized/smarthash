@@ -9,7 +9,7 @@ pip install -r requirements.txt
 echo Environment setup complete.
 
 pyinstaller --noconfirm --add-data "Plugins;Plugins" --additional-hooks-dir "hooks" %* smarthash.py
-
+move dist\smarthash\magic\libmagic\* .\dist\smarthash
 echo Build complete.
 deactivate
 
