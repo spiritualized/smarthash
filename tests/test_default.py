@@ -10,6 +10,7 @@ from Plugins.default import SmarthashPlugin as DefaultPlugin
 from functions import PluginError
 from smarthash import SmartHash
 from tests.MockFile import MockFile
+from tests.compare_torrents import compare_torrents
 from tests.test_smarthash import FIXTURES_ROOT, PATHS
 
 
@@ -56,7 +57,8 @@ class DefaultPluginTests(unittest.TestCase):
             smarthash.process()
     
             assert len(expected) == len(MockFile.get_data(intercept_path))
-            assert expected[70:] == MockFile.get_data(intercept_path)[70:]  # skip the 'created' field
+            assert compare_torrents(expected, MockFile.get_data(intercept_path)) is True
+            # assert expected[71:] == MockFile.get_data(intercept_path)[71:]  # skip the 'created' field
 
     def test_blacklist(self):
         params = [

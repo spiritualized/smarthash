@@ -6,6 +6,7 @@ from mockito import unstub, when, ANY
 
 from smarthash import SmartHash
 from tests.MockFile import MockFile
+from tests.compare_torrents import compare_torrents
 from tests.test_smarthash import FIXTURES_ROOT, PATHS
 
 
@@ -55,4 +56,6 @@ class SavePluginTests(unittest.TestCase):
                 assert fixture_data[i] == MockFile.get_data(os.path.join(intercept_root, fixture_filenames[i]))
 
             # skip the 'created' field on the .torrent
-            assert fixture_data[-1][70:] == MockFile.get_data(os.path.join(intercept_root, fixture_filenames[-1]))[70:]
+            assert compare_torrents(fixture_data[-1],
+                                    MockFile.get_data(os.path.join(intercept_root, fixture_filenames[-1])))
+
