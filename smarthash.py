@@ -18,6 +18,7 @@ import MIFormat
 from functions import *
 from config import *
 from baseplugin import BasePlugin, ParamType, UIMode
+from tools.skip_cache import SkipCache
 
 smarthash_version = "3.0.0"
 requests.utils.default_user_agent = lambda: f"SmartHash/{smarthash_version}"
@@ -41,6 +42,7 @@ class SmartHash:
         self.config = None
         self.args = None
         self.plugins = {}
+        self.skip_cache = SkipCache()
         self.init()
 
     def init(self):
@@ -212,12 +214,19 @@ class SmartHash:
         else:
             self.process_folder_wrapper(path)
 
+        self.skip_cache.save()
+
     def process_folder_wrapper(self, path: str):
+        if self.skip_cache.in_cache(self.args.plugin, path):
+            cprint(f"Skipped [cache]: {path}", 'yellow')
+            return
+
         try:
             self.process_folder(path, self.plugins[self.args.plugin])
             cprint("Done{0}".format(" " * 40), 'green')
 
         except ConflictError as e:
+            self.skip_cache.add(self.args.plugin, path)
             cprint(f"Skipped: {e.message}", 'yellow')
         except ValidationError as e:
             for err in e.errors:

@@ -3,6 +3,7 @@ cache.db
 smarthash.ini
 TODO.txt
 venv-win/
+skip_cache.json
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
