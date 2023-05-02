@@ -95,7 +95,8 @@ def mediainfo_to_string(mediainfo):
                 out += format_line("Color space", track['color_space'])
             if 'chroma_subsampling' in track:
                 out += format_line("Chroma subsampling", track['chroma_subsampling'])
-            out += format_line("Bit depth", track['other_bit_depth'][0])
+            if 'other_bit_depth' in track:
+                out += format_line("Bit depth", track['other_bit_depth'][0])
             if 'scan_type' in track:
                 out += format_line("Scan type", track['scan_type'])
             if 'compression_mode' in track:
