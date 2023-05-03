@@ -119,11 +119,21 @@ def requests_retriable_put(url: str, **kwargs) -> Response:
 
 
 def requests_retriable_get(url: str, **kwargs) -> Response:
+    new_kwargs = kwargs
+    max_attempts = kwargs['max_attempts'] if 'max_attempts' in kwargs else 0
+    del new_kwargs['max_attempts']
+    attempts = 0
+
     while True:
+        attempts += 1
+
         try:
-            response = requests.get(url, **kwargs)
+            response = requests.get(url, **new_kwargs)
             break
         except (requests.exceptions.ConnectionError, requests.exceptions.Timeout):
+            if attempts == max_attempts:
+                raise PluginError('Max connection attempts exceeded')
+
             cprint("Connection error, retrying...", 'red')
             time.sleep(requests_retry_interval)
         except requests.exceptions.RequestException as e:
