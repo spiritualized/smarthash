@@ -1,6 +1,6 @@
 import os
 
-from baseplugin import BasePlugin, Param, ParamType
+from baseplugin import BasePlugin, Param, ParamType, PluginOutput
 
 from functions import PluginError
 
@@ -19,7 +19,7 @@ class SmarthashPlugin(BasePlugin):
 		if data['args'].destination:
 			self.manual_destination(data['args'].destination, data['title'])
 
-	def handle(self, data) -> None:
+	def handle(self, data) -> PluginOutput:
 
 		save_path = data['path'] + ".torrent"
 
@@ -28,6 +28,8 @@ class SmarthashPlugin(BasePlugin):
 			save_path = self.manual_destination(data['args'].destination, data['title'])
 		with open(save_path, 'wb') as handle:
 			handle.write(data['torrent_file'])
+
+		return PluginOutput(data['torrent_file'])
 
 	@staticmethod
 	def manual_destination(destination: str, title: str) -> str:

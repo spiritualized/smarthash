@@ -17,7 +17,7 @@ import configparser
 import MIFormat
 from functions import *
 from config import *
-from baseplugin import BasePlugin, ParamType, UIMode
+from baseplugin import BasePlugin, ParamType, UIMode, PluginOutput
 from tools.skip_cache import SkipCache
 
 smarthash_version = "3.0.0"
@@ -333,7 +333,9 @@ class SmartHash:
         }
 
         print("\rCalling plugin '{0}'...".format(plugin.get_title()))
-        plugin.handle(data)
+
+        plugin_output = plugin.handle(data)
+        assert isinstance(plugin_output, PluginOutput)
 
         # if an operation succeeded, write out the config
         self.save_config()

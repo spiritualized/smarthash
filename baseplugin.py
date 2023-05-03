@@ -12,6 +12,7 @@ class ParamType(Enum):
     CHECKBOX = 4
     RADIO = 5
 
+
 class UIMode(Enum):
     CLI = 1
     GUI = 2
@@ -23,6 +24,11 @@ class HookCommandType(Enum):
     VISIBLE = 2
     OPTIONS = 3
     RESET_DEFAULT = 4
+
+
+class PluginOutput:
+    def __init__(self, torrent_data):
+        self.torrent_data = torrent_data
 
 
 class Param:
@@ -93,5 +99,5 @@ class BasePlugin(PluginMixin):
     def early_validation(self, path, data) -> None:
         pass
 
-    def handle(self, data) -> None:
+    def handle(self, data) -> PluginOutput:
         pass

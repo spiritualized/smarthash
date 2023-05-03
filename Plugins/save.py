@@ -1,4 +1,4 @@
-from baseplugin import BasePlugin, Param, ParamType
+from baseplugin import BasePlugin, Param, ParamType, PluginOutput
 import os
 
 
@@ -13,7 +13,7 @@ class SmarthashPlugin(BasePlugin):
 			  help='Save torrent and metadata to a folder')
 	]
 
-	def handle(self, data) -> None:
+	def handle(self, data) -> PluginOutput:
 
 		meta_folder = data['path']+"_smarthash"
 
@@ -45,6 +45,8 @@ class SmarthashPlugin(BasePlugin):
 
 		with open(torrent_file_path, 'wb') as handle:
 			handle.write(data['torrent_file'])
+
+		return PluginOutput(data['torrent_file'])
 
 	@staticmethod
 	def manual_destination(destination: str, title: str) -> str:
