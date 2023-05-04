@@ -7,6 +7,7 @@ from mockito import when, verify, ANY, unstub
 import baseplugin
 from Plugins.default import SmarthashPlugin as DefaultPlugin
 from functions import BulkMode
+from pluginmixin import PluginOutput
 from smarthash import SmartHash
 
 FIXTURES_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'fixtures'))
@@ -106,7 +107,7 @@ class SmartHashTests(unittest.TestCase):
         plugin = DefaultPlugin()
         smarthash.plugins['default'] = plugin
 
-        when(plugin).handle(ANY).thenReturn(None)
+        when(plugin).handle(ANY).thenReturn(PluginOutput(None))
 
         smarthash.process_folder(PATHS['video'], plugin)
 

@@ -58,7 +58,6 @@ class DefaultPluginTests(unittest.TestCase):
     
             assert len(expected) == len(MockFile.get_data(intercept_path))
             assert compare_torrents(expected, MockFile.get_data(intercept_path)) is True
-            # assert expected[71:] == MockFile.get_data(intercept_path)[71:]  # skip the 'created' field
 
     def test_blacklist(self):
         params = [
