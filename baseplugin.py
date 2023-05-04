@@ -1,103 +1,56 @@
-from enum import Enum
-from typing import List, Optional
+from typing import List
 
-from functions import PluginError, BulkMode
-from pluginmixin import PluginMixin
-
-
-class ParamType(Enum):
-    PATH = 1
-    SELECT = 2
-    TEXT = 3
-    CHECKBOX = 4
-    RADIO = 5
-
-
-class UIMode(Enum):
-    CLI = 1
-    GUI = 2
-    BOTH = 3
-
-
-class HookCommandType(Enum):
-    UPDATE = 1
-    VISIBLE = 2
-    OPTIONS = 3
-    RESET_DEFAULT = 4
-
-
-class PluginOutput:
-    def __init__(self, torrent_data):
-        self.torrent_data = torrent_data
-
-
-class Param:
-    def __init__(self, name: str, param_type: ParamType, label: str = None, default_value=None, help: str = None,
-                 type: type = None, force_lowercase: bool = False, required: bool = False, options: List[str] = None,
-                 visible: bool = True, disabled: bool = False, display_only: bool = False,
-                 ui_mode: UIMode = UIMode.BOTH, load_last_value: bool = True) -> None:
-        self.name = name
-        self.param_type = param_type
-        self.label = label
-        self.default_value = default_value
-        self.help = help
-        self.type = type
-        self.force_lowercase = force_lowercase
-        self.required = required
-        self.options = options
-        self.visible = visible
-        self.disabled = disabled
-        self.display_only = display_only
-        self.ui_mode = ui_mode
-        self.load_last_value = load_last_value
-
-
-class Hook:
-    def __init__(self, element_name: str, function, exec_on_init: bool=False, exec_on_default: bool=False):
-        self.element_name = element_name
-        self.function = function
-        self.exec_on_init = exec_on_init
-        self.exec_on_default = exec_on_default
-
-
-class HookCommand:
-    def __init__(self, command_type: HookCommandType, element_name: str, value = None):
-        self.command_type = command_type
-        self.element_name = element_name
-        self.value = value
+from functions import BulkMode
+from pluginmixin import PluginMixin, PluginOutput
 
 
 class BasePlugin(PluginMixin):
-    plugin_version = None
-    title = None
-    description = ""
-    options = []
-
-    def get_title(self) -> str:
-        if not self.title:
-            raise PluginError('Plugin does not have a title')
-        version = " v{0}".format(self.plugin_version) if self.plugin_version else " [unversioned]"
-        return "{title}{version}".format(title=self.title, version=version)
-
-    def get_param(self, name: str) -> Optional[Param]:
-        for param in self.parameters:
-            if param.name == name:
-                return param
 
     def get_bulk_mode(self, args) -> BulkMode:
+        """
+        Implement to specify which bulk mode scanner should be used, based on parameters sent to the plugin
+        BulkMode.STANDARD: each subfolder in the scan path is treated as an item
+        BulkMode.MUSIC: each music release, identified by the recursive scanner, is treated as an item
+        :param args:
+        :return:
+        """
         return BulkMode.STANDARD
 
     def validate_settings(self) -> None:
+        """
+        # TODO remove
+        """
         pass
 
     def get_update(self, smarthash_version) -> str:
+        """
+        # TODO remove
+        Retrieves an updated version of the current plugin
+        :param smarthash_version: Version of smarthash core
+        :return: text containing an updated plugin's code
+        """
         return ""
 
     def validate_parameters(self, args) -> None:
+        """
+        Implement this function to validate parameters passed to the plugin
+        :raises: PluginError if an invalid combination of parameters are passed
+        """
         pass
 
     def early_validation(self, path, data) -> None:
+        """
+        Implement this function to do server-size content validation before uploading
+        Use to avoid unnecessarily hashing content which would not be accepted
+        :param path: Path to the torrent's contents
+        :param data: plugin parameters and content metadata
+        """
         pass
 
     def handle(self, data) -> PluginOutput:
+        """
+        Required. This function contains the upload logic for the plugin
+        :param data: plugin parameters and content metadata
+        :return: object containing the finalized .torrent file
+        """
         pass

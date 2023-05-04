@@ -1,8 +1,9 @@
 import os
 
-from baseplugin import BasePlugin, Param, ParamType, PluginOutput
+from baseplugin import BasePlugin, PluginOutput
 
 from functions import PluginError
+from pluginmixin import Param, ParamType
 
 
 class SmarthashPlugin(BasePlugin):

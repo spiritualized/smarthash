@@ -17,7 +17,8 @@ import configparser
 import MIFormat
 from functions import *
 from config import *
-from baseplugin import BasePlugin, ParamType, UIMode, PluginOutput
+from baseplugin import BasePlugin, PluginOutput
+from pluginmixin import UIMode, ParamType
 from tools.skip_cache import SkipCache
 
 smarthash_version = "3.0.0"
@@ -251,8 +252,10 @@ class SmartHash:
 
         blacklist_path_matches_enabled = [] if self.args.disable_blacklist else blacklist_path_matches
 
+        blacklist_file_extensions_enabled = blacklist_file_extensions
+
         params = {
-            'blacklist_file_extensions': [x.lower() for x in blacklist_file_extensions],
+            'blacklist_file_extensions': [x.lower() for x in blacklist_file_extensions_enabled],
             'blacklist_path_matches': [x.lower() for x in blacklist_path_matches_enabled],
             'comment': "Generated with SmartHash {0}".format(smarthash_version),
             'smarthash_version': smarthash_version,
