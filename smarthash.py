@@ -60,6 +60,8 @@ class SmartHash:
                                default="default")
         argparser.add_argument("--skip-video-rehash", action="store_true")
         argparser.add_argument("--disable-blacklist", action="store_true", help="Include unwanted files in torrent")
+        argparser.add_argument("--disable-skip-cache", action="store_true",
+                               help="Disables caching of content rejected by a plugin")
 
         bulk = argparser.add_mutually_exclusive_group()
         bulk.add_argument("--bulk", action='store_true', help="process every item in the path individually")
@@ -114,6 +116,9 @@ class SmartHash:
         if self.args.plugin not in self.plugins:
             logging.error("Invalid plugin: {0}".format(self.args.plugin))
             sys.exit(1)
+
+        if self.args.disable_skip_cache:
+            self.skip_cache.disable()
 
         # update the selected plugin
         if self.args.plugin:

@@ -10,9 +10,13 @@ import config
 class SkipCache:
     """Store skipped items in a file to avoid calling a plugin with the same data"""
     def __init__(self):
+        self.disabled = False
         self.new_entries = {}
         self.existing_entries = {}
         self.load()
+
+    def disable(self) -> None:
+        self.disabled = True
 
     def load(self) -> None:
         if os.path.isfile(SkipCache.__cache_filename()):
@@ -39,6 +43,9 @@ class SkipCache:
         self.new_entries = {}
 
     def add(self, plugin, path) -> None:
+        if self.disabled:
+            return
+
         if plugin not in self.new_entries:
             self.new_entries[plugin] = set()
         self.new_entries[plugin].add(path)
@@ -48,6 +55,9 @@ class SkipCache:
             self.save()
 
     def in_cache(self, plugin, path) -> bool:
+        if self.disabled:
+            return False
+
         if plugin in self.existing_entries and path in self.existing_entries[plugin]:
             return True
         if plugin in self.new_entries and path in self.new_entries[plugin]:
