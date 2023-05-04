@@ -252,7 +252,7 @@ class SmartHash:
 
         blacklist_path_matches_enabled = [] if self.args.disable_blacklist else blacklist_path_matches
 
-        blacklist_file_extensions_enabled = blacklist_file_extensions
+        blacklist_file_extensions_enabled = blacklist_file_extensions + plugin.get_blacklist_file_extensions(self.args)
 
         params = {
             'blacklist_file_extensions': [x.lower() for x in blacklist_file_extensions_enabled],

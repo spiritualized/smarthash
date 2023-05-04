@@ -16,6 +16,15 @@ class BasePlugin(PluginMixin):
         """
         return BulkMode.STANDARD
 
+    def get_blacklist_file_extensions(self, args) -> List[str]:
+        """
+        Implement this function to disallow file types based on parameters to the plugin
+        Use to e.g. blacklist archives for media torrents
+        :param args: plugin parameters
+        :return: List of disallowed file extensions
+        """
+        return []
+
     def validate_settings(self) -> None:
         """
         # TODO remove
