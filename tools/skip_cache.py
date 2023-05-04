@@ -4,6 +4,8 @@ from json import JSONDecodeError
 
 from termcolor import cprint
 
+import config
+
 
 class SkipCache:
     """Store skipped items in a file to avoid calling a plugin with the same data"""
@@ -54,4 +56,4 @@ class SkipCache:
 
     @staticmethod
     def __cache_filename() -> str:
-        return os.path.join(os.path.abspath(''), 'skip_cache.json')
+        return os.path.join(os.path.dirname(os.path.abspath(config.__file__)), 'skip_cache.json')
