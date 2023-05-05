@@ -83,6 +83,7 @@ def next_in_file_sequence(path: List[str]) -> Optional[List[str]]:
     name = '.'.join(parts[:-1])
     ext = parts[-1].lower()
 
+    # rar .r00+
     if ext == 'rar':
         return path[:-1] + [f"{name}.r00"]
     elif ext[0] == 'r' and ext[1:].isnumeric():
@@ -90,6 +91,15 @@ def next_in_file_sequence(path: List[str]) -> Optional[List[str]]:
         if num == 99:
             return path[:-1] + [f"{name}.000"]
         return path[:-1] + [f"{name}.r{num:02}"]
+
+    # zip .z01+
+    elif ext == 'zip':
+        return path[:-1] + [f"{name}.z01"]
+    elif ext[0] == 'z' and ext[1:].isnumeric():
+        num = int(ext[1:]) + 1
+        return path[:-1] + [f"{name}.z{num:02}"]
+
+    # multipart .000+
     elif ext.isnumeric():
         num = int(ext) + 1
         if num == 999:
