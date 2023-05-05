@@ -136,3 +136,6 @@ class BTTree(object):
 
         metainfo = MetaInfo(announce=tracker, info=info, **params)
         metainfo.write(os.path.join(target, *self.path) + '.torrent')
+
+    def __repr__(self):
+        return str(f"{str(self.__class__)} {str(self.path)}")

@@ -2,6 +2,8 @@
 import os
 import threading
 from traceback import print_exc
+from typing import List, Dict, Optional
+
 from BitTornado.Meta.BTTree import BTTree
 from BitTornado.Meta.Info import MetaInfo
 
@@ -59,16 +61,72 @@ def is_file_valid(file_obj, params):
 
     return True
 
-def remove_invalid_files(node, params):
-    if not node.subs:
-        if is_file_valid(node, params):
-            return node
+
+def remove_invalid_files(tree: BTTree, params: Dict) -> None:
+    """Remove blacklisted files from the metadata tree"""
+    to_remove = []
+    find_paths_to_remove(tree, params, to_remove)
+
+    for path in to_remove:
+        did_remove = remove_invalid_file(tree, path)
+        next_path = next_in_file_sequence(path)
+        while did_remove and next_path:
+            did_remove = remove_invalid_file(tree, next_path)
+            next_path = next_in_file_sequence(next_path)
+
+
+def next_in_file_sequence(path: List[str]) -> Optional[List[str]]:
+    """Return the next filename in a logical sequence"""
+    parts = path[-1].lower().split('.')
+    if len(parts) == 1:
         return None
-    node.subs = [t for t in [remove_invalid_files(sub, params) for sub in node.subs] if t is not None]
-    node.size = sum(sub.size for sub in node.subs)
-    if node.subs:
-        return node
+    name = '.'.join(parts[:-1])
+    ext = parts[-1].lower()
+
+    if ext == 'rar':
+        return path[:-1] + [f"{name}.r00"]
+    elif ext[0] == 'r' and ext[1:].isnumeric():
+        num = int(ext[1:]) + 1
+        if num == 99:
+            return path[:-1] + [f"{name}.000"]
+        return path[:-1] + [f"{name}.r{num:02}"]
+    elif ext.isnumeric():
+        num = int(ext) + 1
+        if num == 999:
+            return None
+        return path[:-1] + [f"{name}.{num:03}"]
+
     return None
+
+
+def find_paths_to_remove(node: BTTree, params: Dict, marked: List[List[str]]):
+    """Create a list of paths to remove"""
+    if not node.subs:  # node is a file
+        if not is_file_valid(node, params):
+            marked.append(node.path)
+    else:  # node is a folder
+        for sub in node.subs:
+            find_paths_to_remove(sub, params, marked)
+
+
+def remove_invalid_file(node: BTTree, path: List[str]) -> bool:
+    """Recurse through the tree and remove the specified path"""
+    if not node.subs:  # Should only happen in a single file torrent
+        raise ValueError('Single file torrents are not supported')
+
+    for sub in node.subs:
+        if not sub.subs and path == sub.path:  # leaf node matched, remove file
+            node.subs = [x for x in node.subs if x != sub]
+            return True
+
+        if path[0:len(sub.path)] == sub.path:
+            if remove_invalid_file(sub, path):  # file was removed further down the recursion chain
+                if len(sub.subs) == 0:  # remove empty subdirectory
+                    node.subs = [x for x in node.subs if x != sub]
+                return True
+
+    return False  # The tree was fully searched, path was not found
+
 
 def make_meta_file(loc, url, params=None, flag=None,
                    progress=lambda x: None, progress_percent=True):
