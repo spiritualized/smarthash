@@ -4,6 +4,8 @@ import importlib
 import cv2
 import requests.utils
 
+from OutputPlugins.base_output import OutputPlugin
+from OutputPlugins.qbittorrent import QBittorrent
 from libprick import Pricker, PrickError
 from release_dir_scanner import get_release_dirs
 
@@ -43,6 +45,7 @@ class SmartHash:
         self.config = None
         self.args = None
         self.plugins = {}
+        self.output_plugin = None
         self.skip_cache = SkipCache()
         self.init()
 
@@ -126,6 +129,20 @@ class SmartHash:
 
         self.plugins[self.args.plugin].validate_parameters(self.args)
 
+        # set up output plugin
+        output_plugin = self.get_config_value('SmartHash', 'output to').lower()
+        try:
+            if output_plugin in ['', 'none']:
+                self.output_plugin = OutputPlugin()
+            elif output_plugin == 'qbittorrent':
+                self.output_plugin = QBittorrent(self.config['qBittorrent'])
+            else:
+                raise PluginError(f"invalid option '{output_plugin}'")
+        except PluginError as e:
+            plugin_title = self.output_plugin.title if self.output_plugin else '<unknown>'
+            cprint(f"Output plugin '{plugin_title}' failed: {e.error}", 'red')
+            sys.exit(1)
+
     def load_config(self) -> None:
         self.config = configparser.ConfigParser()
         self.config.read(os.path.join(os.path.dirname(os.path.abspath(__file__)), config_filename))
@@ -133,6 +150,14 @@ class SmartHash:
     def save_config(self) -> None:
         with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), config_filename), 'w') as configfile:
             self.config.write(configfile)
+
+    def get_config_value(self, section, attribute: str = None) -> str:
+        if section not in self.config:
+            return ''
+        if attribute not in self.config[section]:
+            return ''
+        return self.config[section][attribute]
+
 
     @staticmethod
     def plugin_find() -> List[str]:
@@ -344,6 +369,11 @@ class SmartHash:
 
         plugin_output = plugin.handle(data)
         assert isinstance(plugin_output, PluginOutput)
+
+        try:
+            self.output_plugin.handle(plugin_output, os.path.dirname(path))
+        except PluginError as e:
+            cprint(f"Output plugin '{self.output_plugin.title} failed: {e.error}", 'red')
 
         # if an operation succeeded, write out the config
         self.save_config()
