@@ -370,6 +370,8 @@ class SmartHash:
         plugin_output = plugin.handle(data)
         assert isinstance(plugin_output, PluginOutput)
 
+        if not isinstance(self.output_plugin, OutputPlugin):
+            print(f"Calling {self.output_plugin.title}...")
         try:
             self.output_plugin.handle(plugin_output, os.path.dirname(path))
         except PluginError as e:
