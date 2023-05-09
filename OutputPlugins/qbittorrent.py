@@ -51,7 +51,8 @@ class QBittorrent(OutputPlugin):
                                    password=self.config['password']) as client:
             result = client.torrents_add(torrent_files=plugin_output.torrent_data,
                                          save_path=path,
-                                         is_paused=self.__get_add_paused())
+                                         is_paused=self.__get_add_paused(),
+                                         use_auto_torrent_management=False)
             if result != 'Ok.':
                 raise PluginError('client rejected the torrent')
 
