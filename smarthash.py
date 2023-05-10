@@ -21,6 +21,7 @@ from functions import *
 from config import *
 from baseplugin import BasePlugin, PluginOutput
 from pluginmixin import UIMode, ParamType
+from tools.process_lock import ProcessLock
 from tools.skip_cache import SkipCache
 
 smarthash_version = "3.0.0"
@@ -47,6 +48,7 @@ class SmartHash:
         self.plugins = {}
         self.output_plugin = None
         self.skip_cache = SkipCache()
+        self.lock = ProcessLock()
         self.init()
 
     def init(self):
@@ -278,6 +280,8 @@ class SmartHash:
         logging.info("----------------------------\n{0}".format(path))
         print("\n{0}".format(path))
 
+        self.lock.acquire()
+
         self.total_media_size, total_duration, smarthash_path_info = extract_metadata(path)
 
         blacklist_path_matches_enabled = [] if self.args.disable_blacklist else blacklist_path_matches
@@ -379,6 +383,8 @@ class SmartHash:
 
         # if an operation succeeded, write out the config
         self.save_config()
+
+        self.lock.release()
 
     def extract_images(self, screenshot_files: List[str]) -> List:
         count = 0
