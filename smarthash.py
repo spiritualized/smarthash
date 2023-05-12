@@ -261,14 +261,17 @@ class SmartHash:
         except ConflictError as e:
             self.skip_cache.add(self.args.plugin, path)
             cprint(f"Skipped: {e.message}", 'yellow')
+            self.lock.release()
         except ValidationError as e:
             for err in e.errors:
                 if len(err) > 400:
                     err = "<error message is too long to display>"
                 cprint("Error: {0}".format(err), 'red')
+            self.lock.release()
 
         except (MagicError, PluginError) as e:
             cprint(e.error, 'red')
+            self.lock.release()
 
         except ServerError as e:
             cprint(f"Server error [{e.error}], retrying in {requests_retry_interval} seconds...", "red")

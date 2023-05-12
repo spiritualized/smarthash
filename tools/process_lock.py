@@ -36,8 +36,7 @@ class ProcessLock:
 
             except AssertionError as e:
                 if str(e) == 'Already locked':
-                    lock_path = f"{self.lock.directory}{os.sep}{self.lock.get_filename(0)}"
-                    sys.stderr.write(f"Lock file already exists: {lock_path}")
+                    sys.stderr.write(f"Lock file already exists: {self.lock.get_filename(0)}")
                     sys.exit(1)
                 raise e
 
