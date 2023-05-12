@@ -1,5 +1,7 @@
 import datetime
 import multiprocessing
+import os
+import sys
 import time
 
 import portalocker
@@ -31,6 +33,13 @@ class ProcessLock:
             except portalocker.AlreadyLocked:
                 self.num_intervals += 1
                 print(f"Queued for {total_wait_time} seconds...", end='\r')
+
+            except AssertionError as e:
+                if str(e) == 'Already locked':
+                    lock_path = f"{self.lock.directory}{os.sep}{self.lock.get_filename(0)}"
+                    sys.stderr.write(f"Lock file already exists: {lock_path}")
+                    sys.exit(1)
+                raise e
 
     def release(self) -> None:
         self.lock.release()
