@@ -51,7 +51,7 @@ class SkipCache:
         self.new_entries[plugin].add(path)
 
         # Save new entries every so often when running large bulk jobs
-        if len(self.new_entries[plugin]) == 20:
+        if len(self.new_entries[plugin]) == 10:
             self.save()
 
     def in_cache(self, plugin, path) -> bool:
