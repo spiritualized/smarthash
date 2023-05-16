@@ -148,7 +148,8 @@ def mediainfo_to_string(mediainfo):
                 out += format_line("Bit rate", track['other_bit_rate'][0])
             if 'other_minimum_bit_rate' in track:
                 out += format_line("Minimum bit rate", track['other_minimum_bit_rate'][0])
-            out += format_line("Channel(s)", track['other_channel_s'][0])
+            if 'other_channel_s' in track:
+                out += format_line("Channel(s)", track['other_channel_s'][0])
             if 'channel_positions' in track:
                 out += format_line("Channel positions", track['channel_positions'])
             out += format_line("Sampling rate", track['other_sampling_rate'][0])
