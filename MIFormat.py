@@ -152,7 +152,8 @@ def mediainfo_to_string(mediainfo):
                 out += format_line("Channel(s)", track['other_channel_s'][0])
             if 'channel_positions' in track:
                 out += format_line("Channel positions", track['channel_positions'])
-            out += format_line("Sampling rate", track['other_sampling_rate'][0])
+            if 'other_sampling_rate' in track:
+                out += format_line("Sampling rate", track['other_sampling_rate'][0])
             if 'other_frame_rate' in track:
                 out += format_line("Frame rate", track['other_frame_rate'][0])
             if 'other_compression_mode' in track:
