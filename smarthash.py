@@ -67,9 +67,7 @@ class SmartHash:
         argparser.add_argument("--disable-blacklist", action="store_true", help="Include unwanted files in torrent")
         argparser.add_argument("--disable-skip-cache", action="store_true",
                                help="Disables caching of content rejected by a plugin")
-
-        bulk = argparser.add_mutually_exclusive_group()
-        bulk.add_argument("--bulk", action='store_true', help="process every item in the path individually")
+        argparser.add_argument("--bulk", action='store_true', help="process every item in the path individually")
 
         unique_params = {}
 
