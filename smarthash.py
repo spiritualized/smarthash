@@ -69,6 +69,9 @@ class SmartHash:
                                help="Disables caching of content rejected by a plugin")
         argparser.add_argument("--bulk", action='store_true', help="process every item in the path individually")
 
+        argparser.add_argument("--bulk-sleep-interval", type=int, choices=range(1, 60), default=0,
+                               help="Sleep interval (in minutes) between successful bulk mode items")
+
         unique_params = {}
 
         for x in plugin_filenames:
@@ -255,6 +258,10 @@ class SmartHash:
         try:
             self.process_folder(path, self.plugins[self.args.plugin])
             cprint("Done{0}".format(" " * 40), 'green')
+
+            if self.args.bulk and self.args.bulk_sleep_interval:
+                print(f"Sleeping for {self.args.bulk_sleep_interval} minutes...")
+                time.sleep(self.args.bulk_sleep_interval * 60)
 
         except ConflictError as e:
             self.skip_cache.add(self.args.plugin, path)
