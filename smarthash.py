@@ -142,8 +142,7 @@ class SmartHash:
             else:
                 raise PluginError(f"invalid option '{output_plugin}'")
         except PluginError as e:
-            plugin_title = self.output_plugin.title if self.output_plugin else '<unknown>'
-            cprint(f"Output plugin '{plugin_title}' failed: {e.error}", 'red')
+            cprint(f"Output plugin '{output_plugin}' failed: {e.error}", 'red')
             sys.exit(1)
 
     def load_config(self) -> None:
