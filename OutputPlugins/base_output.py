@@ -1,3 +1,4 @@
+from functions import PluginError
 from pluginmixin import PluginOutput
 
 
@@ -31,3 +32,22 @@ class OutputPlugin:
         :raises PluginError if the torrent cannot be processed
         """
         return
+
+    def _get_port(self) -> int:
+        if 'port' not in self.config or not self.config['port'].isnumeric():
+            raise PluginError(f"Invalid {self.title} configuration value for 'port'")
+        port = int(self.config['port'])
+        if port < 0 or port > 65535:
+            raise PluginError(f"deluge port out of range ({port})")
+        return port
+
+    def _get_add_paused(self) -> bool:
+        if 'add paused' not in self.config:
+            return True
+        if self.config['add paused'].lower() not in ['true', 'false']:
+            raise PluginError(f"Invalid {self.title} configuration for value 'add paused': "
+                              f"must be one of [true, false]")
+        if self.config['add paused'].lower() == 'true':
+            return True
+        elif self.config['add paused'].lower() == 'false':
+            return False
