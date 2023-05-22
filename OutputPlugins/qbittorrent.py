@@ -13,7 +13,7 @@ class QBittorrent(OutputPlugin):
         Validate plugin-specific configuration, raise
         :raises PluginError on invalid configuration parameter
         """
-        for value in ['host', 'username', 'password', 'add paused']:
+        for value in ['host', 'username', 'password']:
             if value not in self.config or not self.config[value]:
                 raise PluginError(f"Invalid {self.title} configuration value for '{value}'")
         self._get_port()
@@ -24,8 +24,8 @@ class QBittorrent(OutputPlugin):
         Ensure that a connection to the external program can be made
         :raises PluginError if a connection cannot be established
         """
-        qbt_client = qbittorrentapi.Client(host='localhost',
-                                           port=int(self.config['port']),
+        qbt_client = qbittorrentapi.Client(host=self.config['host'],
+                                           port=self._get_port(),
                                            username=self.config['username'],
                                            password=self.config['password'])
 
@@ -44,7 +44,7 @@ class QBittorrent(OutputPlugin):
         :param path: the path being hashed
         :raises PluginError if the torrent cannot be processed
         """
-        with qbittorrentapi.Client(host='localhost',
+        with qbittorrentapi.Client(host=self.config['host'],
                                    port=self._get_port(),
                                    username=self.config['username'],
                                    password=self.config['password']) as client:
