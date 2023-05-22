@@ -7,6 +7,7 @@ import requests.utils
 from OutputPlugins.base_output import OutputPlugin
 from OutputPlugins.deluge import Deluge
 from OutputPlugins.qbittorrent import QBittorrent
+from OutputPlugins.transmission import Transmission
 from libprick import Pricker, PrickError
 from release_dir_scanner import get_release_dirs
 
@@ -142,6 +143,8 @@ class SmartHash:
                 self.output_plugin = Deluge(self.config['deluge'])
             elif output_plugin == 'qbittorrent':
                 self.output_plugin = QBittorrent(self.config['qBittorrent'])
+            elif output_plugin == 'transmission':
+                self.output_plugin = Transmission(self.config['Transmission'])
             else:
                 raise PluginError(f"invalid option '{output_plugin}'")
         except PluginError as e:
