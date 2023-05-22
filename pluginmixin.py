@@ -1,8 +1,10 @@
+import hashlib
 import os
 import sys
 from enum import Enum
 from typing import Optional, List
 
+from BitTornado.Meta.bencode import bdecode, bencode
 from functions import PluginError
 
 
@@ -30,6 +32,9 @@ class HookCommandType(Enum):
 class PluginOutput:
     def __init__(self, torrent_data):
         self.torrent_data = torrent_data
+
+    def get_hex_hash(self) -> str:
+        return hashlib.sha1(bencode(bdecode(self.torrent_data)['info'])).hexdigest()
 
 
 class Param:

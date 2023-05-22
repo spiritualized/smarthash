@@ -5,6 +5,7 @@ import cv2
 import requests.utils
 
 from OutputPlugins.base_output import OutputPlugin
+from OutputPlugins.deluge import Deluge
 from OutputPlugins.qbittorrent import QBittorrent
 from libprick import Pricker, PrickError
 from release_dir_scanner import get_release_dirs
@@ -137,6 +138,8 @@ class SmartHash:
         try:
             if output_plugin in ['', 'none']:
                 self.output_plugin = OutputPlugin()
+            elif output_plugin == 'deluge':
+                self.output_plugin = Deluge(self.config['deluge'])
             elif output_plugin == 'qbittorrent':
                 self.output_plugin = QBittorrent(self.config['qBittorrent'])
             else:
@@ -386,7 +389,7 @@ class SmartHash:
         try:
             self.output_plugin.handle(plugin_output, os.path.dirname(path))
         except PluginError as e:
-            cprint(f"Output plugin '{self.output_plugin.title} failed: {e.error}", 'red')
+            cprint(f"Output plugin '{self.output_plugin.title}' failed: {e.error}", 'red')
 
         # if an operation succeeded, write out the config
         self.save_config()
