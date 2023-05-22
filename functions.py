@@ -272,6 +272,9 @@ def verify_imdb(imdb_id: str) -> None:
         raise ValidationError(["Invalid IMDb ID: {0}".format(imdb_id)])
     logging.info("IMDb verified: \"{0}\"".format(imdb_movie))
 
+    if imdb_id != imdb_movie.data['imdbID']:
+        logging.info(f"IMDb ID redirect [{imdb_id} -> {imdb_movie.data['imdbID']}]")
+
 
 def extract_metadata(path: str) -> Tuple[int, int, Dict]:
     file_list = list_files(path)
