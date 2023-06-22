@@ -246,7 +246,7 @@ class OrderedSet(set):
         return x
 
 
-class DictSet(TypedDict, collections.MutableSet):
+class DictSet(TypedDict, collections.abc.MutableSet):
     """A set that can be bencoded as a dictionary
 
     This object can be interacted with either as a set or as a dictionary
@@ -259,11 +259,11 @@ class DictSet(TypedDict, collections.MutableSet):
     valconst = bool
 
     # Ignore dict implementations
-    __ge__ = collections.Set.__ge__
-    __gt__ = collections.Set.__gt__
-    __le__ = collections.Set.__le__
-    __lt__ = collections.Set.__lt__
-    __eq__ = collections.Set.__eq__
+    __ge__ = collections.abc.Set.__ge__
+    __gt__ = collections.abc.Set.__gt__
+    __le__ = collections.abc.Set.__le__
+    __lt__ = collections.abc.Set.__lt__
+    __eq__ = collections.abc.Set.__eq__
 
     @classmethod
     def _normalize_seq(cls, seq):
