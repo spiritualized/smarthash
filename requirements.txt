@@ -1,7 +1,7 @@
 bitstring>=3.1.5
 cinemagoer>=2022.12.27
 colorama>=0.3.9
-libprick>=1.1.0
+libprick>=1.2.1
 mockito~=1.4.0
 mutagen>=1.40.0
 numpy==1.24.3
