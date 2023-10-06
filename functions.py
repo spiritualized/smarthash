@@ -26,35 +26,39 @@ from config import whitelist_video_extensions, blacklist_media_extensions, white
     requests_retry_interval
 
 
-class ValidationError(Exception):
+class SmartHashError(Exception):
+    pass
+
+
+class ValidationError(SmartHashError):
     """Raised by plugins when incomplete or invalid files or metadata is passed in"""
     def __init__(self, errors: List[str]):
         self.errors = errors
 
 
-class ConflictError(Exception):
+class ConflictError(SmartHashError):
     """Raised by plugins when the operation was skipped (e.g. during a duplicate upload attempt)"""
     def __init__(self, message: str, params: Dict[str, str] = None):
         self.message = message
         self.params = params
 
 
-class PluginError(Exception):
+class PluginError(SmartHashError):
     def __init__(self, err: str):
         self.error = err
 
 
-class ServerError(Exception):
+class ServerError(SmartHashError):
     def __init__(self, err: str):
         self.error = err
 
 
-class UpdateError(Exception):
+class UpdateError(SmartHashError):
     def __init__(self, err: str):
         self.error = err
 
 
-class MagicError(Exception):
+class MagicError(SmartHashError):
     def __init__(self, err: str):
         self.error = err
 

@@ -201,7 +201,6 @@ class SmartHash:
                 return
 
         if new_plugin_src != "":
-            # noinspection PyBroadException
             try:
                 plugin_path = self.get_plugin_path()
                 with open(os.path.join(plugin_path, '__temp__.py'), 'w+') as plugin_file:
@@ -215,7 +214,7 @@ class SmartHash:
                                                                      plugin.plugin_version,
                                                                      new_plugin_module.plugin_version))
                 self.plugins[plugin.get_filename()] = new_plugin_module
-            except Exception:
+            except SmartHashError:
                 cprint("Failed updating to new version of '{0}'".format(plugin.description))
                 sys.exit(1)
 
@@ -274,17 +273,14 @@ class SmartHash:
         except ConflictError as e:
             self.skip_cache.add(self.args.plugin, path)
             cprint(f"Skipped: {e.message}", 'yellow')
-            self.lock.release()
         except ValidationError as e:
             for err in e.errors:
                 if len(err) > 400:
                     err = "<error message is too long to display>"
                 cprint("Error: {0}".format(err), 'red')
-            self.lock.release()
 
         except (MagicError, PluginError) as e:
             cprint(e.error, 'red')
-            self.lock.release()
 
         except ServerError as e:
             cprint(f"Server error [{e.error}], retrying in {requests_retry_interval} seconds...", "red")
@@ -311,12 +307,16 @@ class SmartHash:
             'smarthash_version': smarthash_version,
         }
 
-        plugin.early_validation(path, {
-            'args': self.args,
-            'smarthash_info': smarthash_path_info,
-            'title': os.path.basename(path),
-            'params': params
-        })
+        try:
+            plugin.early_validation(path, {
+                'args': self.args,
+                'smarthash_info': smarthash_path_info,
+                'title': os.path.basename(path),
+                'params': params
+            })
+        except SmartHashError as e:
+            self.lock.release()
+            raise e
 
         # hash the folder
         metainfo = make_meta_file(path, None, params=params, progress=self.hash_progress_callback)
@@ -387,7 +387,12 @@ class SmartHash:
 
         print("\rCalling plugin '{0}'...".format(plugin.get_title()))
 
-        plugin_output = plugin.handle(data)
+        try:
+            plugin_output = plugin.handle(data)
+        except SmartHashError as e:
+            self.lock.release()
+            raise e
+
         assert isinstance(plugin_output, PluginOutput)
 
         if not isinstance(self.output_plugin, OutputPlugin):
