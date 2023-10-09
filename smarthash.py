@@ -284,8 +284,6 @@ class SmartHash:
 
         except ServerError as e:
             cprint(f"Server error [{e.error}], retrying in {requests_retry_interval} seconds...", "red")
-            time.sleep(requests_retry_interval)
-            self.process_folder_wrapper(path)
 
     def process_folder(self, path: str, plugin: BasePlugin):
 
