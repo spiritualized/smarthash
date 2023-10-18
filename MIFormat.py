@@ -31,7 +31,8 @@ def mediainfo_to_string(mediainfo):
             if 'format_version' in track:
                 out += format_line("Format version", track['format_version'])
             out += format_line("File size", track['other_file_size'][0])
-            out += format_line("Duration", track['other_duration'][0])
+            if 'other_duration' in track:
+                out += format_line("Duration", track['other_duration'][0])
             if 'other_overall_bit_rate_mode' in track:
                 out += format_line("Overall bit rate mode", track['other_overall_bit_rate_mode'][0])
             out += format_line("Overall bit rate", track['other_overall_bit_rate'][0])
