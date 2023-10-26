@@ -35,7 +35,8 @@ def mediainfo_to_string(mediainfo):
                 out += format_line("Duration", track['other_duration'][0])
             if 'other_overall_bit_rate_mode' in track:
                 out += format_line("Overall bit rate mode", track['other_overall_bit_rate_mode'][0])
-            out += format_line("Overall bit rate", track['other_overall_bit_rate'][0])
+            if 'other_overall_bit_rate' in track:
+                out += format_line("Overall bit rate", track['other_overall_bit_rate'][0])
             if 'encoded_date' in track:
                 out += format_line("Encoded date", track['encoded_date'])
             if 'writing_application' in track:
