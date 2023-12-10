@@ -1,3 +1,5 @@
+import platform
+
 import shutil
 
 import json
@@ -45,13 +47,14 @@ class SkipCache:
 
         self.new_entries = {}
 
-    def add(self, plugin, path) -> None:
+    def add(self, plugin: str, path: str) -> None:
         if self.disabled:
             return
 
         if plugin not in self.new_entries:
             self.new_entries[plugin] = set()
-        self.new_entries[plugin].add(path)
+
+        self.new_entries[plugin].add(SkipCache.cache_entry_normalized(path))
 
         # Save new entries every so often when running large bulk jobs
         if len(self.new_entries[plugin]) == 10:
@@ -61,12 +64,18 @@ class SkipCache:
         if self.disabled:
             return False
 
-        if plugin in self.existing_entries and path in self.existing_entries[plugin]:
+        normalized_path = SkipCache.cache_entry_normalized(path)
+
+        if plugin in self.existing_entries and normalized_path in self.existing_entries[plugin]:
             return True
-        if plugin in self.new_entries and path in self.new_entries[plugin]:
+        if plugin in self.new_entries and normalized_path in self.new_entries[plugin]:
             return True
         return False
 
     @staticmethod
     def __cache_filename() -> str:
         return os.path.join(os.path.dirname(os.path.abspath(config.__file__)), 'skip_cache.json')
+
+    @staticmethod
+    def cache_entry_normalized(path: str) -> str:
+        return path.lower() if platform.system() == "Windows" else path
