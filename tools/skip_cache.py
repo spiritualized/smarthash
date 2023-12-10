@@ -1,3 +1,5 @@
+import shutil
+
 import json
 import os
 from json import JSONDecodeError
@@ -36,9 +38,10 @@ class SkipCache:
                 self.existing_entries[plugin] = set()
             self.existing_entries[plugin].update(self.new_entries[plugin])
 
-        with open(SkipCache.__cache_filename(), 'w') as f:
+        with open(f"{SkipCache.__cache_filename()}.tmp", 'w') as f:
             serializable = {plugin: list(self.existing_entries[plugin]) for plugin in self.existing_entries.keys()}
             f.write(json.dumps(serializable))
+        shutil.move(f"{SkipCache.__cache_filename()}.tmp", SkipCache.__cache_filename())
 
         self.new_entries = {}
 
