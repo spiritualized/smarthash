@@ -50,10 +50,14 @@ def is_file_valid(file_obj, params):
     path = [x2.lower() for x2 in file_obj.path]
 
     # Check if any of the file/foldernames contain a blacklisted word
-    for pathsegment in path:
-        for match in params['blacklist_path_matches']:
-            if match in pathsegment:
+    for match in params['blacklist_path_matches']:
+        for pathsegment in path:
+            if match == pathsegment:
                 return False
+
+        filename = os.path.splitext(os.path.basename(path[-1]))[0]
+        if filename.lower().endswith(match.lower()):  # exact/postfix match
+            return False
 
     # Check if the file is on the extension blacklist
     if path[-1].endswith(tuple(params['blacklist_file_extensions'])):
