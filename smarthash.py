@@ -264,6 +264,7 @@ class SmartHash:
 
         try:
             self.process_folder(path, self.plugins[self.args.plugin])
+            self.skip_cache.add(self.args.plugin, path)
             cprint("Done{0}".format(" " * 40), 'green')
 
             if self.args.bulk and self.args.bulk_sleep_interval:
