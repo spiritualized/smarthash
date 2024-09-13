@@ -432,7 +432,6 @@ class SmartHash:
             interval = math.floor((frame_count - frame_count_10 * 2) / (n2 + 1))
 
             tmp_images = []
-            tmp_variances = []
 
             for i in range(0, n2):
                 vidcap.set(cv2.CAP_PROP_POS_FRAMES, (frame_count_10 + i * interval))  # added this line
@@ -442,8 +441,7 @@ class SmartHash:
                     success, buf = cv2.imencode(".jpeg", image)
 
                     variance = cv2.Laplacian(image, cv2.CV_64F).var()
-                    tmp_images.append(buf.tobytes())
-                    tmp_variances.append([i, variance])
+                    tmp_images.append([i, variance, buf.tobytes()])
                 else:
                     logging.error(f"Screenshot extraction failed ({i+1} of {n2})")
 
@@ -452,10 +450,10 @@ class SmartHash:
 
             # select the N candidates with the highest variance, preserving order
             num_images = min(images_per_video_file, len(tmp_images))
-            tmp_variances = sorted(tmp_variances, key=img_key_variance, reverse=True)[0:num_images]
-            tmp_variances = sorted(tmp_variances, key=img_key_order)
+            tmp_images = sorted(tmp_images, key=img_key_variance, reverse=True)[0:num_images]
+            tmp_images = sorted(tmp_images, key=img_key_order)
 
-            images.append([tmp_images[x[0]] for x in tmp_variances])
+            images.append([x[2] for x in tmp_images])
 
         return images
 
