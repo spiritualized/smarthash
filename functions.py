@@ -68,6 +68,13 @@ class BulkMode(Enum):
     MUSIC = 2
 
 
+class Screenshot:
+    def __init__(self, index: int, variance: float, image: str):
+        self.index = index
+        self.variance = variance
+        self.image = image
+
+
 folder_default = 'Select a folder to hash'
 
 
@@ -147,14 +154,6 @@ def requests_retriable_get(url: str, **kwargs) -> Response:
             raise e
 
     return response
-
-
-def img_key_variance(item):
-    return item[1]
-
-
-def img_key_order(item):
-    return item[0]
 
 
 def list_files(parent_dir):

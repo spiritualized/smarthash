@@ -6,8 +6,8 @@ import requests
 from mockito import when, ANY, verify
 
 from functions import error, requests_retriable_post, requests_retriable_put, requests_retriable_get, \
-    img_key_variance, list_files, get_mime_type, MagicError, mp3_info, imdb_id_to_url, imdb_url_to_id, \
-    ValidationError, verify_imdb, extract_metadata, img_key_order, filter_screenshot_paths
+    list_files, get_mime_type, MagicError, mp3_info, imdb_id_to_url, imdb_url_to_id, \
+    ValidationError, verify_imdb, extract_metadata, filter_screenshot_paths
 from tests.test_smarthash import FIXTURES_ROOT, PATHS
 
 
@@ -35,12 +35,6 @@ class FunctionTests(unittest.TestCase):
         when(requests).get(ANY).thenReturn(None)
         requests_retriable_get('http://test')
         verify(requests, times=1).get(ANY)
-
-    def test_img_key_variance(self):
-        assert img_key_variance(['first', 'second']) == 'second'
-
-    def test_img_key_order(self):
-        assert img_key_order(['first', 'second']) == 'first'
 
     def test_list_files(self):
         list_path = os.path.join(FIXTURES_ROOT, 'audio')

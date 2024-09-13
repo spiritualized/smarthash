@@ -441,7 +441,7 @@ class SmartHash:
                     success, buf = cv2.imencode(".jpeg", image)
 
                     variance = cv2.Laplacian(image, cv2.CV_64F).var()
-                    tmp_images.append([i, variance, buf.tobytes()])
+                    tmp_images.append(Screenshot(i, variance, buf.tobytes()))
                 else:
                     logging.error(f"Screenshot extraction failed ({i+1} of {n2})")
 
@@ -450,10 +450,10 @@ class SmartHash:
 
             # select the N candidates with the highest variance, preserving order
             num_images = min(images_per_video_file, len(tmp_images))
-            tmp_images = sorted(tmp_images, key=img_key_variance, reverse=True)[0:num_images]
-            tmp_images = sorted(tmp_images, key=img_key_order)
+            tmp_images = sorted(tmp_images, key=lambda x: x.variance, reverse=True)[0:num_images]
+            tmp_images = sorted(tmp_images, key=lambda x: x.index)
 
-            images.append([x[2] for x in tmp_images])
+            images.append([x.image for x in tmp_images])
 
         return images
 
