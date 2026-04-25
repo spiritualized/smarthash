@@ -6,10 +6,11 @@ python -m venv venv-win
 CALL venv-win/Scripts/activate.bat
 python -m pip install --upgrade pip
 pip install -r requirements.txt
+pip install git+https://github.com/cinemagoer/cinemagoer --no-deps
 echo Environment setup complete.
 
 pyinstaller --noconfirm --add-data "Plugins;Plugins" --additional-hooks-dir "hooks" %* smarthash.py
-move dist\smarthash\magic\libmagic\* .\dist\smarthash
+move libmagic.dll magic.mgc .\dist\smarthash
 echo Build complete.
 deactivate
 

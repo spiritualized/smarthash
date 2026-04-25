@@ -23,14 +23,14 @@ A set of screenshots are extracted from each video file. These can be useful for
 ### Usage instructions
 
 Windows installation
-* Download and install Python 3.6.5 (or later) - https://www.python.org/downloads
+* Download and install Python 3.14.4 (or later) - https://www.python.org/downloads
 * Download and install Git - https://git-scm.com/download/win
 * In your C:\, right click, and select "Git Bash Here" from the context menu
 * Install virtualenv for Python, by entering: 
 ```pip install virtualenv```
 * Clone the SmartHash repository, by entering: 
 ```git clone https://github.com/spiritualized/smarthash.git```
-* Run win-install.bat to set up the virtualenv
+* Run build.bat to set up the virtualenv
 * Add C:\smarthash to your PATH
 
 Linux

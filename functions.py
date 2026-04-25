@@ -275,7 +275,7 @@ def verify_imdb(imdb_id: str) -> None:
         raise ValidationError(["Invalid IMDb ID: {0}".format(imdb_id)])
     logging.info("IMDb verified: \"{0}\"".format(imdb_movie))
 
-    if imdb_id != imdb_movie.data['imdbID']:
+    if imdb_id != imdb_movie.movieID:
         logging.info(f"IMDb ID redirect [{imdb_id} -> {imdb_movie.data['imdbID']}]")
 
 
