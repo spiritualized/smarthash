@@ -11,11 +11,10 @@ from pathlib import Path
 from typing import List, Tuple, Dict, Optional
 
 import bitstring
-import imdb  # noqa
 import magic
 import mutagen
 import requests
-from imdb import IMDbDataAccessError
+from auteur import Auteur, AuteurItemNotFoundError
 from mutagen.flac import VCFLACDict  # noqa
 from mutagen.id3 import ID3
 from pymediainfo import MediaInfo
@@ -266,17 +265,17 @@ def imdb_url_to_id(imdb_url: str) -> str:
 def verify_imdb(imdb_id: str) -> None:
     # imdb._logging.setLevel("error")
     logging.info('IMDb querying...'),
-    imdb_site = imdb.Cinemagoer()
+    auteur = Auteur()
 
     try:
-        imdb_movie = imdb_site.get_movie(imdb_id)
-    except IMDbDataAccessError:
+        imdb_movie = auteur.imdb_title(imdb_id)
+    except AuteurItemNotFoundError:
         logging.error("Invalid IMDb ID: {0}".format(imdb_id))
         raise ValidationError(["Invalid IMDb ID: {0}".format(imdb_id)])
     logging.info("IMDb verified: \"{0}\"".format(imdb_movie))
 
-    if imdb_id != imdb_movie.movieID:
-        logging.info(f"IMDb ID redirect [{imdb_id} -> {imdb_movie.data['imdbID']}]")
+    if imdb_id != imdb_movie.imdbid():
+        logging.info(f"IMDb ID redirect [{imdb_id} -> {imdb_movie.imdbid()}]")
 
 
 def extract_metadata(path: str) -> Tuple[int, int, Dict]:
